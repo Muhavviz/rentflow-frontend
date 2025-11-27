@@ -65,12 +65,28 @@ export default function AuthProvider(props){
         }
     }
 
-    const handleRegister = () => {
+    const handleRegister = async(formData) => {
         try {
-            
+            const response = axios.post('/api/users/register',formData);
+            navigate('/login')
         } catch (err) {
-            const errorMsg = err.response?.data?.error || 'Registration failed';
-            userDispatch({type:'SET_ERRORS',payload:errorMsg})
+            console.log(err);
+            
+            if(err.response && err.response.data ){
+                if(Array.isArray(err.response.data.error)){
+                    const messages = err.response.data.error.map( ele => ele.message ).join(', ');
+                    userDispatch({type:'SET_ERRORS',payload:messages});
+                }
+                else if (typeof err.response.data.error === 'string') {
+                    userDispatch({ type: 'SET_ERRORS', payload: err.response.data.error });
+                }
+                else {
+                    userDispatch({ type: 'SET_ERRORS', payload: 'Registration failed' });
+                }
+            }
+            else{
+                userDispatch({ type: 'SET_ERRORS', payload: 'Something went wrong. Is backend running?' });
+            }
         }
     }
     const handleLogout = () => {
