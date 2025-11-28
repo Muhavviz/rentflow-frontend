@@ -35,7 +35,7 @@ export default function AuthProvider(props){
         if(localStorage.getItem('token')){
             (async () => {
                 try {
-                    const response = await axios.get('/api/users/dashboard',{headers:{Authorization:localStorage.getItem('token')}});
+                    const response = await axios.get('/api/dashboard',{headers:{Authorization:localStorage.getItem('token')}});
                     userDispatch({type:'LOGIN',payload:response.data})
                 } catch (err) {
                     localStorage.removeItem('token');

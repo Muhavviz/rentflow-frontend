@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "../config/axios";
 
-export const fetchBuilding = createAsyncThunk('buildings/fetchBuildings',async(_,{rejectWithValue}) => {
+export const fetchBuildings = createAsyncThunk('buildings/fetchBuildings',async(_,{rejectWithValue}) => {
     try {
         const response = await axios.get('/api/buildings', {headers:{Authorization:localStorage.getItem('token')}});
         return response.data;
@@ -20,14 +20,14 @@ const buildingSlice = createSlice({
     reducers:{},
     extraReducers: (builder) => {
         builder
-        .addCase(fetchBuilding.pending, (state) => {
+        .addCase(fetchBuildings.pending, (state) => {
             state.isLoading = true;
         })
-        .addCase(fetchBuilding.fulfilled, (state,action) => {
+        .addCase(fetchBuildings.fulfilled, (state,action) => {
             state.isLoading = false;
             state.data = action.payload
         })
-        .addCase(fetchBuilding.rejected, (state,action) => {
+        .addCase(fetchBuildings.rejected, (state,action) => {
             state.isLoading = false;
             state.serverError = action.payload;
         })
