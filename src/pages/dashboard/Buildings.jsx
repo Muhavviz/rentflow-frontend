@@ -4,7 +4,8 @@ import { fetchBuildings } from "@/slices/building-slice";
 import { Card,CardContent,CardHeader,CardTitle } from "@/components/ui/card";
 import { Plus,Building2,MapPin } from "lucide-react";
 import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+import AddBuildingModal from "./AddBuildingModal";
 
 
 export default function Buildings(){
@@ -32,7 +33,7 @@ export default function Buildings(){
                         Manage your properties and view their occupancy status.
                     </p>
             </div>
-            <Button><Plus className='mr-2 h-4 w-4'/>Add Building</Button>
+            <AddBuildingModal />
         </div>
 
         {buildings.length === 0 ? (<div className="text-center py-20 bg-white border border-dashed rounded-lg">
