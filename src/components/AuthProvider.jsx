@@ -48,7 +48,7 @@ export default function AuthProvider(props){
     }, [] );
 
     const handleLogin = async(formData) => {
-        try {
+
             const response = await axios.post('/api/users/login',formData);
 
             if(response.data.user.needsPasswordChange){
@@ -59,35 +59,15 @@ export default function AuthProvider(props){
                 navigate('/dashboard');
             }
             
-        } catch (err) {
-            const errorMsg = err.response?.data?.error || 'Something went wrong';
-            userDispatch({type:'SET_ERRORS',payload : errorMsg});
-        }
+
     }
 
     const handleRegister = async(formData) => {
-        try {
-            const response = axios.post('/api/users/register',formData);
+        
+            await axios.post('/api/users/register',formData);
             navigate('/login')
-        } catch (err) {
-            console.log(err);
-            
-            if(err.response && err.response.data ){
-                if(Array.isArray(err.response.data.error)){
-                    const messages = err.response.data.error.map( ele => ele.message ).join(', ');
-                    userDispatch({type:'SET_ERRORS',payload:messages});
-                }
-                else if (typeof err.response.data.error === 'string') {
-                    userDispatch({ type: 'SET_ERRORS', payload: err.response.data.error });
-                }
-                else {
-                    userDispatch({ type: 'SET_ERRORS', payload: 'Registration failed' });
-                }
-            }
-            else{
-                userDispatch({ type: 'SET_ERRORS', payload: 'Something went wrong. Is backend running?' });
-            }
-        }
+       
+      
     }
     const handleLogout = () => {
         localStorage.removeItem('token');
