@@ -1,5 +1,5 @@
 import axios from "axios";
 
 export default axios.create({
-    baseURL:'http://localhost:5555'
+    baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:5555'
 })
