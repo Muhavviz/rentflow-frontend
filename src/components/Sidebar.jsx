@@ -49,7 +49,7 @@ export default function Sidebar(){
                         {user?.name || 'Owner'}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                        {user?.email }
+                        {user?.email || 'email' }
                     </p>
                 </div>
 
