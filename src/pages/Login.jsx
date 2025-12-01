@@ -43,6 +43,8 @@ export default function Login(){
                         });
                     }
                 } else {
+                    console.log(err);
+                    
                     setGlobalError("Something went wrong. Please check your connection.");
                 }
             }

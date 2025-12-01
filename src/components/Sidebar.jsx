@@ -3,10 +3,19 @@ import { LayoutDashboard,Building2,Users,FileText,LogOut } from "lucide-react";
 import clsx from "clsx";
 import { useContext } from "react";
 import UserContext from "@/context/UserContext";
+import { resetBuildings } from "@/slices/building-slice";
+import { useDispatch } from "react-redux";
 
 export default function Sidebar(){
     const location = useLocation();
-    const {handleLogout,user} = useContext(UserContext)
+    const {handleLogout,user} = useContext(UserContext);
+
+    const dispatch = useDispatch();
+
+    const onLogoutClick = () => {
+        dispatch(resetBuildings());
+        handleLogout();
+    }
 
     const navItems = [
         {name:'Overview',icon:LayoutDashboard,path:'/dashboard'},
@@ -49,12 +58,12 @@ export default function Sidebar(){
                         {user?.name || 'Owner'}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                        {user?.email || 'email' }
+                        {user?.email }
                     </p>
                 </div>
 
                 <button
-                onClick={handleLogout} 
+                onClick={onLogoutClick} 
                 className="flex items-center gap-3 px-4 py-2 w-full text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
                 >
                     <LogOut size={18}/>

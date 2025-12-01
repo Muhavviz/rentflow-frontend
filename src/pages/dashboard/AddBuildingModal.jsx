@@ -19,7 +19,7 @@ const buildingSchema = Yup.object({
     })
 })
 
-export default function AddBuildingModal(){
+export default function AddBuildingModal({children}){
     const [open,setOpen] = useState(false);
     const dispatch = useDispatch();
 
@@ -46,9 +46,10 @@ export default function AddBuildingModal(){
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
+                {children ? children : (<Button>
                     <Plus className="mr-2 h-4 w-4"/> Add Building
-                </Button>
+                </Button>)}
+                
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

@@ -26,7 +26,13 @@ const buildingSlice = createSlice({
         isLoading:false,
         serverError:null
     },
-    reducers:{},
+    reducers:{
+        resetBuildings: (state) => {
+            state.data = [];
+            state.isLoading = false;
+            state.serverError = null;
+        }
+    },
     extraReducers: (builder) => {
         builder
         .addCase(fetchBuildings.pending, (state) => {
@@ -55,5 +61,7 @@ const buildingSlice = createSlice({
         })
     }
 });
+
+export const {resetBuildings} = buildingSlice.actions;
 
 export default buildingSlice.reducer;

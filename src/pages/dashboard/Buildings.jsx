@@ -2,7 +2,7 @@ import { useSelector,useDispatch } from "react-redux"
 import { useEffect } from "react";
 import { fetchBuildings } from "@/slices/building-slice";
 import { Card,CardContent,CardHeader,CardTitle } from "@/components/ui/card";
-import { Plus,Building2,MapPin } from "lucide-react";
+import { Building2,MapPin } from "lucide-react";
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button";
 import AddBuildingModal from "./AddBuildingModal";
@@ -14,10 +14,12 @@ export default function Buildings(){
     const {data: buildings,isLoading,serverError} = useSelector( (state) => state.buildings )
 
     useEffect( () => {
-        dispatch(fetchBuildings());
-    }, [dispatch] );
+        if(buildings.length == 0){
+            dispatch(fetchBuildings());
+        }
+    }, [dispatch,buildings.length] );
 
-    if(isLoading){
+    if(isLoading && buildings.length == 0){
         return <p className="text-center text-gray-500 mt-10">Loading your empire...</p>;
     }
 
@@ -33,14 +35,17 @@ export default function Buildings(){
                         Manage your properties and view their occupancy status.
                     </p>
             </div>
-            <AddBuildingModal />
+            {buildings.length > 0 && <AddBuildingModal />}
+            
         </div>
 
         {buildings.length === 0 ? (<div className="text-center py-20 bg-white border border-dashed rounded-lg">
             <Building2 className="h-10 w-10 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium">No buildings yet</h3>
             <p className="text-gray-500 mb-4">Start by adding your first property.</p>
-            <Button variant='outline'>Create Building</Button>
+            <AddBuildingModal>
+                <Button variant='outline'>Create Building</Button>
+            </AddBuildingModal>
         </div>) : (<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {buildings.map( (building) => (
                 <Card key={building._id} className="hover:shadow-md transition-shadow">
