@@ -150,6 +150,6 @@ export default function AddBuildingModal({ children, buildingId }) {
                     </div>
                 </form>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     )
 }
