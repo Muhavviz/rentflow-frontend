@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUnitsByBuilding } from "@/slices/units-slice";
+import { fetchAgreementsByUnit } from "@/slices/agreement-slice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, Home } from "lucide-react";
 import AddUnitModal from "./AddUnitModal";
+import CreateAgreementModal from "./components/CreateAgreementModal";
 import axios from "@/config/axios";
 
 export default function BuildingDetails() {
@@ -17,6 +19,7 @@ export default function BuildingDetails() {
     (state) => state.units
   );
   const buildings = useSelector((state) => state.buildings.data);
+  const { agreementsByUnitId } = useSelector((state) => state.agreements);
 
   const units = dataByBuildingId[id] || [];
 
@@ -27,7 +30,7 @@ export default function BuildingDetails() {
   }, [dispatch, id, units.length]);
 
   useEffect(() => {
-    const buildingFromStore = buildings.find((building) => b._id === id);
+    const buildingFromStore = buildings.find((building) => building._id === id);
     if (buildingFromStore) {
       setBuildingName(buildingFromStore.name);
     } else if (id) {
@@ -43,6 +46,25 @@ export default function BuildingDetails() {
         });
     }
   }, [id, buildings]);
+
+
+  useEffect(() => {
+    if (units.length > 0) {
+      units.forEach((unit) => {
+        if (unit.status === "occupied" && !agreementsByUnitId[unit._id]) {
+          dispatch(fetchAgreementsByUnit(unit._id));
+        }
+      });
+    }
+  }, [units, dispatch,agreementsByUnitId]);
+
+
+  const hasByUnitAgreement = (unitId) => {
+    const agreements = agreementsByUnitId[unitId] || [];
+    return agreements.some(
+      (agreement) => agreement.isActive && agreement.rentingType === "By Unit"
+    );
+  };
 
   return (
     <div>
@@ -122,7 +144,19 @@ export default function BuildingDetails() {
                   )}
                 </CardContent>
               </div>
-              <div className="flex justify-end px-4 pb-3">
+              <div className="flex justify-end gap-2 px-4 pb-3">
+                {!(unit.status === "occupied" && hasByUnitAgreement(unit._id)) && (
+                  <CreateAgreementModal unit={unit} buildingId={id}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      <Home className="h-3 w-3 mr-1" />
+                      {unit.status === "occupied" ? "Add Bedspace" : "Rent"}
+                    </Button>
+                  </CreateAgreementModal>
+                )}
                 <AddUnitModal buildingId={id} unit={unit}>
                   <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                     <Pencil className="h-3 w-3" />
