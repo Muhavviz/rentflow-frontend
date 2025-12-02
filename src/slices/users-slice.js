@@ -30,12 +30,29 @@ export const createTenant = createAsyncThunk(
   }
 );
 
+export const fetchDashboardStats = createAsyncThunk(
+  "users/fetchDashboardStats",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get("/api/dashboard/stats", {
+        headers: { Authorization: localStorage.getItem("token") },
+      });
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { error: "Something went wrong" });
+    }
+  }
+);
+
 const usersSlice = createSlice({
   name: "users",
   initialState: {
     searchedTenant: null,
     isLoading: false,
     serverError: null,
+    dashboardStats: null,
+    statsLoading: false,
+    statsError: null,
   },
   reducers: {
     clearSearchedTenant: (state) => {
@@ -74,6 +91,19 @@ const usersSlice = createSlice({
       .addCase(createTenant.rejected, (state, action) => {
         state.isLoading = false;
         state.serverError = action.payload;
+      })
+      .addCase(fetchDashboardStats.pending, (state) => {
+        state.statsLoading = true;
+        state.statsError = null;
+      })
+      .addCase(fetchDashboardStats.fulfilled, (state, action) => {
+        state.statsLoading = false;
+        state.dashboardStats = action.payload;
+        state.statsError = null;
+      })
+      .addCase(fetchDashboardStats.rejected, (state, action) => {
+        state.statsLoading = false;
+        state.statsError = action.payload;
       });
   },
 });
