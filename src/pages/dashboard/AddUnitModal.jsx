@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch } from "react-redux";
-import { createUnit } from "@/slices/units-slice";
+import { createUnit, updateUnit } from "@/slices/units-slice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,19 +27,23 @@ const unitSchema = Yup.object({
   status: Yup.string().required("Status is required"),
 });
 
-export default function AddUnitModal({ children, buildingId }) {
+export default function AddUnitModal({ children, buildingId, unit }) {
   const [open, setOpen] = useState(false);
   const [globalError, setGlobalError] = useState(null);
   const dispatch = useDispatch();
 
+  const isEditMode = !!unit;
+
   const formik = useFormik({
     initialValues: {
-      unitNumber: "",
-      floorNumber: "",
-      rentAmount: "",
-      unitType: "1BHK",
-      status: "vacant",
+      unitNumber: unit?.unitNumber || "",
+      floorNumber: unit?.floorNumber || "",
+      rentAmount:
+        typeof unit?.rentAmount === "number" ? String(unit.rentAmount) : "",
+      unitType: unit?.unitType || "1BHK",
+      status: unit?.status || "vacant",
     },
+    enableReinitialize: true,
     validationSchema: unitSchema,
     validateOnBlur: true,
     validateOnChange: true,
@@ -47,16 +51,22 @@ export default function AddUnitModal({ children, buildingId }) {
       setGlobalError(null);
       const payload = {
         unitNumber: values.unitNumber,
-        building: buildingId,
         floorNumber: values.floorNumber || undefined,
         rentAmount: Number(values.rentAmount),
         unitType: values.unitType,
         status: values.status,
       };
 
-      const action = await dispatch(createUnit(payload));
+      const action = isEditMode
+        ? await dispatch(updateUnit({ id: unit._id, formData: payload }))
+        : await dispatch(
+            createUnit({
+              ...payload,
+              building: buildingId,
+            })
+          );
 
-      if (createUnit.rejected.match(action)) {
+      if (createUnit.rejected.match(action) || updateUnit.rejected.match(action)) {
         const err = action.payload;
         if (err?.error && typeof err.error === "string") {
           setGlobalError(err.error);
@@ -67,7 +77,9 @@ export default function AddUnitModal({ children, buildingId }) {
             }
           });
         } else {
-          setGlobalError("Something went wrong while creating the unit.");
+          setGlobalError(
+            `Something went wrong while ${isEditMode ? "updating" : "creating"} the unit.`
+          );
         }
         return;
       }
@@ -78,6 +90,12 @@ export default function AddUnitModal({ children, buildingId }) {
   });
 
   const isError = (field) => formik.touched[field] && formik.errors[field];
+
+  useEffect(() => {
+    if (!open) {
+      setGlobalError(null);
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -92,9 +110,11 @@ export default function AddUnitModal({ children, buildingId }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Unit</DialogTitle>
+          <DialogTitle>{isEditMode ? "Edit Unit" : "Add Unit"}</DialogTitle>
           <DialogDescription>
-            Enter the details for a new unit in this building.
+            {isEditMode
+              ? "Update the details of this unit."
+              : "Enter the details for a new unit in this building."}
           </DialogDescription>
         </DialogHeader>
 
@@ -191,7 +211,7 @@ export default function AddUnitModal({ children, buildingId }) {
               {formik.isSubmitting ? (
                 <Loader2 className="animate-spin h-4 w-4" />
               ) : (
-                "Save Unit"
+                isEditMode ? "Update Unit" : "Save Unit"
               )}
             </Button>
           </div>

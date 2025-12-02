@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchUnitsByBuilding } from "@/slices/units-slice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 import AddUnitModal from "./AddUnitModal";
 
 export default function BuildingDetails() {
@@ -63,34 +64,46 @@ export default function BuildingDetails() {
           </p>
         ) : (
           units.map((unit) => (
-            <Card key={unit._id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {unit.unitNumber}
-                </CardTitle>
-                {unit.unitType && (
-                  <span className="text-[10px] px-2 py-1 rounded-full bg-gray-100 capitalize">
-                    {unit.unitType}
-                  </span>
-                )}
-              </CardHeader>
-              <CardContent>
-                {unit.floorNumber && (
-                  <div className="text-xs text-muted-foreground mb-2">
-                    Floor: {unit.floorNumber}
-                  </div>
-                )}
-                {unit.rentAmount != null && (
-                  <div className="text-lg font-semibold">
-                    ₹ {unit.rentAmount}
-                  </div>
-                )}
-                {unit.status && (
-                  <p className="text-xs text-muted-foreground mt-1 capitalize">
-                    Status: {unit.status}
-                  </p>
-                )}
-              </CardContent>
+            <Card
+              key={unit._id}
+              className="hover:shadow-md transition-shadow flex flex-col justify-between"
+            >
+              <div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {unit.unitNumber}
+                  </CardTitle>
+                  {unit.unitType && (
+                    <span className="text-[10px] px-2 py-1 rounded-full bg-gray-100 capitalize">
+                      {unit.unitType}
+                    </span>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  {unit.floorNumber && (
+                    <div className="text-xs text-muted-foreground mb-2">
+                      Floor: {unit.floorNumber}
+                    </div>
+                  )}
+                  {unit.rentAmount != null && (
+                    <div className="text-lg font-semibold">
+                      ₹ {unit.rentAmount}
+                    </div>
+                  )}
+                  {unit.status && (
+                    <p className="text-xs text-muted-foreground mt-1 capitalize">
+                      Status: {unit.status}
+                    </p>
+                  )}
+                </CardContent>
+              </div>
+              <div className="flex justify-end px-4 pb-3">
+                <AddUnitModal buildingId={id} unit={unit}>
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                </AddUnitModal>
+              </div>
             </Card>
           ))
         )}
