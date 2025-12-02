@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUnitsByBuilding } from "@/slices/units-slice";
@@ -6,14 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import AddUnitModal from "./AddUnitModal";
+import axios from "@/config/axios";
 
 export default function BuildingDetails() {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const [buildingName, setBuildingName] = useState(null);
 
   const { dataByBuildingId, isLoading, serverError } = useSelector(
     (state) => state.units
   );
+  const buildings = useSelector((state) => state.buildings.data);
 
   const units = dataByBuildingId[id] || [];
 
@@ -23,11 +26,33 @@ export default function BuildingDetails() {
     }
   }, [dispatch, id, units.length]);
 
+  useEffect(() => {
+    const buildingFromStore = buildings.find((building) => b._id === id);
+    if (buildingFromStore) {
+      setBuildingName(buildingFromStore.name);
+    } else if (id) {
+      axios
+        .get(`/api/buildings/${id}`, {
+          headers: { Authorization: localStorage.getItem("token") },
+        })
+        .then((response) => {
+          setBuildingName(response.data.name);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch building:", err);
+        });
+    }
+  }, [id, buildings]);
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-2">Building Details</h1>
       <p className="text-gray-500 mb-6">
-        Showing units for Building ID: <span className="font-mono">{id}</span>
+        Showing units for {buildingName ? (
+          <span className="font-semibold">{buildingName}</span>
+        ) : (
+          <span className="font-mono">Building ID: {id}</span>
+        )}
       </p>
 
       <div className="flex justify-between items-center mb-4">
