@@ -5,6 +5,7 @@ import UserContext from './context/UserContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ChangePassword from './pages/ChangePassword';
 import DashboardLayout from './components/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
 import Buildings from './pages/dashboard/Buildings'
@@ -22,6 +23,7 @@ function App() {
           <Route path='/' element={<Home />}></Route>
           <Route path='/login' element={<Login />}></Route>
           <Route path='/register' element={<Register />}></Route>
+          <Route path='/change-password' element={<ChangePassword />}></Route>
           <Route path='/dashboard' element={isLoggedIn || localStorage.getItem('token') ? <DashboardLayout /> :<Navigate to='/login' />}>
           <Route index element={<Overview />} />
           <Route path='buildings' element={<Buildings />} />

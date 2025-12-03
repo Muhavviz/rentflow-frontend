@@ -51,10 +51,12 @@ export default function AuthProvider(props){
 
             const response = await axios.post('/api/users/login',formData);
 
+            // Store token even if password change is required (needed for authentication)
+            localStorage.setItem('token',response.data.token);
+
             if(response.data.user.needsPasswordChange){
                 navigate('/change-password',{state:{email:formData.email}});
             }else{
-                localStorage.setItem('token',response.data.token);
                 userDispatch({type:'LOGIN',payload:response.data.user});
                 navigate('/dashboard');
             }

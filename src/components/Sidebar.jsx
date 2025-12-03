@@ -1,5 +1,5 @@
-import { Link,useLocation } from "react-router-dom";
-import { LayoutDashboard,Building2,Users,FileText,LogOut } from "lucide-react";
+import { Link,useLocation, useNavigate } from "react-router-dom";
+import { LayoutDashboard,Building2,Users,FileText,LogOut,KeyRound } from "lucide-react";
 import clsx from "clsx";
 import { useContext } from "react";
 import UserContext from "@/context/UserContext";
@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 
 export default function Sidebar(){
     const location = useLocation();
+    const navigate = useNavigate();
     const {handleLogout,user} = useContext(UserContext);
 
     const dispatch = useDispatch();
@@ -15,6 +16,10 @@ export default function Sidebar(){
     const onLogoutClick = () => {
         dispatch(resetBuildings());
         handleLogout();
+    }
+
+    const onChangePasswordClick = () => {
+        navigate('/change-password');
     }
 
     const navItems = [
@@ -61,6 +66,14 @@ export default function Sidebar(){
                         {user?.email }
                     </p>
                 </div>
+
+                <button
+                onClick={onChangePasswordClick} 
+                className="flex items-center gap-3 px-4 py-2 w-full text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-transparent hover:border-gray-200 mb-2"
+                >
+                    <KeyRound size={18}/>
+                    Change Password
+                </button>
 
                 <button
                 onClick={onLogoutClick} 
