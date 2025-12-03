@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAgreementsByUnit } from "@/slices/agreement-slice";
+import { fetchAgreementsByUnit, terminateAgreement } from "@/slices/agreement-slice";
+import { fetchBuildings } from "@/slices/building-slice";
+import { fetchUnitsByBuilding } from "@/slices/units-slice";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger
@@ -81,6 +83,54 @@ export default function AgreementDetailsModal({ children, unitId }) {
   const handleEditSuccess = () => {
     setIsEditing(false);
     setEditingAgreementId(null);
+  };
+
+  const handleTerminateAgreement = async (agreement) => {
+    const confirmed = window.confirm("Are you sure? This will end the lease.");
+    if (!confirmed) return;
+
+    try {
+      await dispatch(terminateAgreement(agreement._id)).unwrap();
+      
+      // Get buildingId from the unit to refresh units
+      // Try multiple sources: agreement.unit (populated), unit from state, or from units store
+      let buildingId = null;
+      
+      // First try from agreement's unit (if populated)
+      if (agreement.unit && typeof agreement.unit === 'object') {
+        buildingId = agreement.unit.building?._id || agreement.unit.building;
+      }
+      
+      // If not found, try from the unit in component state
+      if (!buildingId && unit?.building) {
+        buildingId = typeof unit.building === 'object' ? unit.building._id : unit.building;
+      }
+      
+      // If still not found, try to find from units store
+      if (!buildingId) {
+        for (const bid in dataByBuildingId) {
+          const foundUnit = dataByBuildingId[bid].find(u => u._id === unitId);
+          if (foundUnit?.building) {
+            buildingId = typeof foundUnit.building === 'object' ? foundUnit.building._id : foundUnit.building;
+            break;
+          }
+        }
+      }
+      
+      // Close the modal
+      setOpen(false);
+      
+      // Re-fetch units for the building to update unit status
+      if (buildingId) {
+        dispatch(fetchUnitsByBuilding(buildingId));
+      }
+      
+      // Also re-fetch buildings for consistency
+      dispatch(fetchBuildings());
+    } catch (error) {
+      console.error("Failed to terminate agreement:", error);
+      alert(error?.error || "Failed to terminate agreement. Please try again.");
+    }
   };
 
   const PdfButton = ({ agreement, variant = "outline", size = "sm", showText = true }) => (
@@ -190,6 +240,27 @@ export default function AgreementDetailsModal({ children, unitId }) {
                       <AgreementView agreement={agreement} />
                       <PdfButton agreement={agreement} />
                     </div>
+                    {/* Terminate Button for Bedspace */}
+                    <div className="mt-4 pt-4 border-t flex justify-end">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTerminateAgreement(agreement);
+                        }}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Terminating...
+                          </>
+                        ) : (
+                          "Terminate Lease"
+                        )}
+                      </Button>
+                    </div>
                   </CardContent>
                 )}
               </Card>
@@ -199,6 +270,23 @@ export default function AgreementDetailsModal({ children, unitId }) {
           // 3. SINGLE AGREEMENT MODE
           <div className="mt-4">
              <AgreementView agreement={primaryAgreement} />
+             {/* Footer with Terminate Button */}
+             <div className="mt-6 pt-4 border-t flex justify-end">
+               <Button
+                 variant="destructive"
+                 onClick={() => handleTerminateAgreement(primaryAgreement)}
+                 disabled={isLoading}
+               >
+                 {isLoading ? (
+                   <>
+                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                     Terminating...
+                   </>
+                 ) : (
+                   "Terminate Lease"
+                 )}
+               </Button>
+             </div>
           </div>
         )}
       </DialogContent>

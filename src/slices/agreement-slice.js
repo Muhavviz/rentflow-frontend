@@ -44,6 +44,20 @@ export const updateAgreement = createAsyncThunk(
   }
 );
 
+export const terminateAgreement = createAsyncThunk(
+  "agreements/terminateAgreement",
+  async (agreementId, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`/api/agreements/${agreementId}/terminate`, {}, {
+        headers: { Authorization: localStorage.getItem("token") },
+      });
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { error: "Something went wrong" });
+    }
+  }
+);
+
 const agreementSlice = createSlice({
   name: "agreements",
   initialState: {
@@ -110,6 +124,40 @@ const agreementSlice = createSlice({
         }
       })
       .addCase(updateAgreement.rejected, (state, action) => {
+        state.isLoading = false;
+        state.serverError = action.payload;
+      })
+      .addCase(terminateAgreement.pending, (state) => {
+        state.isLoading = true;
+        state.serverError = null;
+      })
+      .addCase(terminateAgreement.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.serverError = null;
+        
+        const terminatedAgreement = action.payload;
+        if (terminatedAgreement) {
+          // Find and update the agreement in cache
+          const unitId = typeof terminatedAgreement.unit === 'object' 
+            ? terminatedAgreement.unit._id || terminatedAgreement.unit 
+            : terminatedAgreement.unit;
+          
+          if (unitId && state.agreementsByUnitId[unitId]) {
+            const index = state.agreementsByUnitId[unitId].findIndex(
+              (a) => a._id === terminatedAgreement._id
+            );
+            if (index !== -1) {
+              // Update status to 'terminated' and isActive to false
+              state.agreementsByUnitId[unitId][index] = {
+                ...state.agreementsByUnitId[unitId][index],
+                status: 'terminated',
+                isActive: false
+              };
+            }
+          }
+        }
+      })
+      .addCase(terminateAgreement.rejected, (state, action) => {
         state.isLoading = false;
         state.serverError = action.payload;
       });
