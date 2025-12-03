@@ -9,6 +9,8 @@ import DashboardLayout from './components/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
 import Buildings from './pages/dashboard/Buildings'
 import BuildingDetails from './pages/dashboard/BuildingDetails';
+import Tenants from './pages/dashboard/Tenants';
+import Agreements from './pages/dashboard/Agreements';
 import MyHome from './pages/tenant/MyHome';
 import TenantLayout from './pages/dashboard/TenantLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -33,8 +35,8 @@ function App() {
           <Route index element={<Overview />} />
           <Route path='buildings' element={<Buildings />} />
           <Route path='buildings/:id' element={<BuildingDetails />}/>
-          <Route path='tenants' element={<div className="text-2xl font-bold">Tenants List (Coming Soon)</div>} />
-          <Route path='agreements' element={<div className="text-2xl font-bold">Agreements List (Coming Soon)</div>} />
+          <Route path='tenants' element={<Tenants />} />
+          <Route path='agreements' element={<Agreements />} />
           </Route>
 
           <Route path='/tenant' element={

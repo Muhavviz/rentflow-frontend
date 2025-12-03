@@ -72,6 +72,20 @@ export const fetchMyResidences = createAsyncThunk(
   }
 );
 
+export const fetchAgreementsByOwner = createAsyncThunk(
+  "agreements/fetchByOwner",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get("/api/agreements", {
+        headers: { Authorization: localStorage.getItem("token") },
+      });
+      return response.data || [];
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { error: "Something went wrong" });
+    }
+  }
+);
+
 const agreementSlice = createSlice({
   name: "agreements",
   initialState: {
@@ -79,6 +93,7 @@ const agreementSlice = createSlice({
     serverError: null,
     agreementsByUnitId: {},
     myResidences: [],
+    ownerAgreements: [],
   },
   reducers: {
     resetAgreementError: (state) => {
@@ -186,6 +201,19 @@ const agreementSlice = createSlice({
         state.myResidences = action.payload;
       })
       .addCase(fetchMyResidences.rejected, (state, action) => {
+        state.isLoading = false;
+        state.serverError = action.payload;
+      })
+      .addCase(fetchAgreementsByOwner.pending, (state) => {
+        state.isLoading = true;
+        state.serverError = null;
+      })
+      .addCase(fetchAgreementsByOwner.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.serverError = null;
+        state.ownerAgreements = action.payload;
+      })
+      .addCase(fetchAgreementsByOwner.rejected, (state, action) => {
         state.isLoading = false;
         state.serverError = action.payload;
       });
