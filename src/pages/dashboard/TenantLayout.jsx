@@ -1,5 +1,5 @@
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { Home, FileText, CreditCard, LogOut, MessageSquare } from "lucide-react";
+import { Home, CreditCard, LogOut, MessageSquare } from "lucide-react";
 import { useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserContext from "../../context/UserContext";
@@ -11,7 +11,6 @@ export default function TenantLayout() {
 
     const navItems = [
         { name: "My Home", icon: Home, path: "/tenant/home" },
-        { name: "My Agreement", icon: FileText, path: "/tenant/agreement" },
         // { name: "Payments", icon: CreditCard, path: "/tenant/payments" },
         // { name: "Contact", icon: MessageSquare, path: "/tenant/contact" },
     ];

@@ -1,13 +1,21 @@
 import { motion } from "framer-motion";
-import { useContext, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import { 
     Home, Calendar, IndianRupee, FileText, 
-    Building2, Clock, CheckCircle2 
+    Building2, Clock, CheckCircle2, Download
 } from "lucide-react";
 import UserContext from "../../context/UserContext";
 import SplitText from "../../components/SplitText";
 import StatCard from "./components/StatCard";
+import { fetchMyResidences } from "../../slices/agreement-slice";
+import LeaseAgreementDocument from "../../components/documents/LeaseAgreementDocument";
+// Import the new helpers
+import { 
+    formatDate, formatCurrency, formatAddress, 
+    calculateDaysUntilRenewal, calculateNextPaymentDate 
+} from "../../utils/formatters";
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -24,25 +32,38 @@ const itemVariants = {
 
 export default function MyHome() {
     const { user } = useContext(UserContext);
-    const [isLoading, setIsLoading] = useState(true);
+    const dispatch = useDispatch();
+    const { myResidences, isLoading } = useSelector((state) => state.agreements);
 
     useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 800);
-        return () => clearTimeout(timer);
-    }, []);
+        dispatch(fetchMyResidences());
+    }, [dispatch]);
 
-    // Placeholder data - Connect to Redux later
-    const residenceInfo = {
-        unitNumber: "101-A",
-        buildingName: "Quick Win Tower",
-        address: "123 Innovation Drive, Tech City",
-        leaseStartDate: "2025-01-01",
-        leaseEndDate: "2025-12-31",
-        monthlyRent: "₹ 20,000",
-        status: "active",
-        nextPaymentDate: "Dec 5, 2025",
-        daysUntilRenewal: 45
-    };
+    // Get the first active agreement
+    const agreement = myResidences && myResidences.length > 0 ? myResidences[0] : null;
+
+    // Get unit data
+    const unit = useMemo(() => {
+        if (agreement?.unit && typeof agreement.unit === 'object') {
+            return agreement.unit;
+        }
+        return null;
+    }, [agreement]);
+
+    // Get owner data
+    const owner = useMemo(() => {
+        if (unit?.building?.owner) {
+            if (typeof unit.building.owner === 'object' && unit.building.owner.name) {
+                return unit.building.owner;
+            }
+        }
+        if (agreement?.owner) {
+            if (typeof agreement.owner === 'object' && agreement.owner.name) {
+                return agreement.owner;
+            }
+        }
+        return { name: 'Property Owner' };
+    }, [unit, agreement]);
 
     if (isLoading) {
         return (
@@ -58,12 +79,60 @@ export default function MyHome() {
         );
     }
 
+    if (!agreement) {
+        return (
+            <div className="max-w-7xl mx-auto p-4">
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8"
+                >
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-3 bg-green-100 rounded-2xl">
+                            <Home className="h-8 w-8 text-green-600" />
+                        </div>
+                        <div>
+                            <SplitText
+                                text={`Welcome, ${user?.name ? user.name.split(' ')[0] : 'Resident'}!`}
+                                className="text-4xl font-bold text-gray-900"
+                                delay={50}
+                                duration={0.6}
+                                textAlign="left"
+                            />
+                        </div>
+                    </div>
+                </motion.div>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center"
+                >
+                    <Home className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No Active Residence</h3>
+                    <p className="text-gray-500">You don't have any active lease agreements at the moment.</p>
+                </motion.div>
+            </div>
+        );
+    }
+
+    // Use the helpers to format data
+    const residenceInfo = {
+        unitNumber: agreement.unit?.unitNumber || "N/A",
+        buildingName: agreement.unit?.building?.name || "N/A",
+        address: formatAddress(agreement.unit?.building?.address),
+        leaseStartDate: formatDate(agreement.leaseStartDate),
+        leaseEndDate: formatDate(agreement.leaseEndDate),
+        monthlyRent: formatCurrency(agreement.rentAmount),
+        status: agreement.status || "active",
+        nextPaymentDate: calculateNextPaymentDate(agreement.rentDueDate),
+        daysUntilRenewal: calculateDaysUntilRenewal(agreement.leaseEndDate)
+    };
+
     const firstName = user?.name ? user.name.split(' ')[0] : 'Resident';
     const welcomeText = `Welcome Home, ${firstName}!`;
 
     return (
         <div className="max-w-7xl mx-auto p-4">
-            {/* Header Area */}
             <motion.div 
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -74,7 +143,6 @@ export default function MyHome() {
                         <Home className="h-8 w-8 text-green-600" />
                     </div>
                     <div>
-                        {/* RESTORED: SplitText Component */}
                         <SplitText
                             text={welcomeText}
                             className="text-4xl font-bold text-gray-900"
@@ -121,10 +189,10 @@ export default function MyHome() {
                     <StatCard icon={Clock} label="Days Until Renewal" value={`${residenceInfo.daysUntilRenewal} days`} gradient="from-orange-500 to-orange-600" delay={0.4} />
                 </div>
 
-                {/* Split Layout: Details & Actions */}
+                {/* Split Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Left: Residence Details */}
+                    {/* Left: Details */}
                     <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -134,9 +202,7 @@ export default function MyHome() {
                         </div>
                         <div className="p-6 grid gap-6">
                             <div className="flex items-start gap-4">
-                                <div className="p-2 bg-blue-50 rounded-lg">
-                                    <Building2 className="h-6 w-6 text-blue-600" />
-                                </div>
+                                <div className="p-2 bg-blue-50 rounded-lg"><Building2 className="h-6 w-6 text-blue-600" /></div>
                                 <div>
                                     <p className="text-sm text-gray-500">Building</p>
                                     <p className="text-lg font-medium">{residenceInfo.buildingName}</p>
@@ -144,9 +210,7 @@ export default function MyHome() {
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">
-                                <div className="p-2 bg-orange-50 rounded-lg">
-                                    <FileText className="h-6 w-6 text-orange-600" />
-                                </div>
+                                <div className="p-2 bg-orange-50 rounded-lg"><FileText className="h-6 w-6 text-orange-600" /></div>
                                 <div>
                                     <p className="text-sm text-gray-500">Lease Period</p>
                                     <p className="text-lg font-medium">{residenceInfo.leaseStartDate} — {residenceInfo.leaseEndDate}</p>
@@ -155,24 +219,31 @@ export default function MyHome() {
                         </div>
                     </motion.div>
 
-                    {/* Right: Quick Actions */}
+                    {/* Right: Actions */}
                     <motion.div variants={itemVariants} className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border border-gray-200 h-fit">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                         <div className="space-y-3">
-                            <Link to="/tenant/agreement">
-                                <motion.div 
-                                    whileHover={{ scale: 1.02, backgroundColor: "rgb(240, 253, 244)", borderColor: "rgb(134, 239, 172)" }}
-                                    className="flex items-center gap-3 p-4 bg-white rounded-xl border cursor-pointer transition-colors"
-                                >
-                                    <div className="p-2 bg-green-100 rounded-lg">
-                                        <FileText className="h-5 w-5 text-green-600" />
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-gray-900">View Agreement</p>
-                                        <p className="text-xs text-gray-500">Download PDF</p>
-                                    </div>
-                                </motion.div>
-                            </Link>
+                            
+                            <PDFDownloadLink
+                                document={<LeaseAgreementDocument agreement={agreement} unit={unit} owner={owner} />}
+                                fileName={`My_Lease_${residenceInfo.unitNumber}.pdf`}
+                                style={{ textDecoration: "none" }}
+                            >
+                                {({ loading }) => (
+                                    <motion.div 
+                                        whileHover={{ scale: 1.02, backgroundColor: "rgb(240, 253, 244)", borderColor: "rgb(134, 239, 172)" }}
+                                        className="flex items-center gap-3 p-4 bg-white rounded-xl border cursor-pointer transition-colors"
+                                    >
+                                        <div className="p-2 bg-green-100 rounded-lg">
+                                            {loading ? <Download className="h-5 w-5 text-green-600 animate-pulse" /> : <FileText className="h-5 w-5 text-green-600" />}
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-gray-900">{loading ? "Generating..." : "Download Agreement"}</p>
+                                            <p className="text-xs text-gray-500">Get your PDF copy</p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </PDFDownloadLink>
                             
                             <motion.div 
                                 whileHover={{ scale: 1.02, backgroundColor: "rgb(239, 246, 255)", borderColor: "rgb(147, 197, 253)" }}
@@ -188,7 +259,6 @@ export default function MyHome() {
                             </motion.div>
                         </div>
                     </motion.div>
-
                 </div>
             </motion.div>
         </div>

@@ -58,12 +58,27 @@ export const terminateAgreement = createAsyncThunk(
   }
 );
 
+export const fetchMyResidences = createAsyncThunk(
+  "agreements/fetchMyResidences",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get("/api/tenant/agreements", {
+        headers: { Authorization: localStorage.getItem("token") },
+      });
+      return response.data || [];
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { error: "Something went wrong" });
+    }
+  }
+);
+
 const agreementSlice = createSlice({
   name: "agreements",
   initialState: {
     isLoading: false,
     serverError: null,
     agreementsByUnitId: {},
+    myResidences: [],
   },
   reducers: {
     resetAgreementError: (state) => {
@@ -158,6 +173,19 @@ const agreementSlice = createSlice({
         }
       })
       .addCase(terminateAgreement.rejected, (state, action) => {
+        state.isLoading = false;
+        state.serverError = action.payload;
+      })
+      .addCase(fetchMyResidences.pending, (state) => {
+        state.isLoading = true;
+        state.serverError = null;
+      })
+      .addCase(fetchMyResidences.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.serverError = null;
+        state.myResidences = action.payload;
+      })
+      .addCase(fetchMyResidences.rejected, (state, action) => {
         state.isLoading = false;
         state.serverError = action.payload;
       });
