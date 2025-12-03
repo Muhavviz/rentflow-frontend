@@ -42,7 +42,7 @@ export const updateAgreementSchema = (hasEmergencyContact, hasIdProof, originalL
     leaseEndDate: originalLeaseStartDate
       ? Yup.date()
           .min(
-            originalLeaseStartDate,
+            new Date(originalLeaseStartDate),
             "End date must be after start date"
           )
           .optional()

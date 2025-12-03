@@ -79,12 +79,31 @@ export default function AgreementDetailsModal({ children, unitId }) {
           <div className="py-8 text-center text-muted-foreground">No active agreements found.</div>
         ) : isEditing ? (
           // 1. EDIT MODE
-          <AgreementEditForm 
-            agreement={activeAgreements.find(a => a._id === editingAgreementId)}
-            unitId={unitId}
-            onCancel={() => setIsEditing(false)}
-            onSuccess={handleEditSuccess}
-          />
+          (() => {
+            const editingAgreement = activeAgreements.find(a => a._id === editingAgreementId);
+            if (!editingAgreement) {
+              return (
+                <div className="py-8 text-center text-muted-foreground">
+                  Agreement not found. It may have been removed.
+                  <Button 
+                    variant="outline" 
+                    className="mt-4" 
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Close
+                  </Button>
+                </div>
+              );
+            }
+            return (
+              <AgreementEditForm 
+                agreement={editingAgreement}
+                unitId={unitId}
+                onCancel={() => setIsEditing(false)}
+                onSuccess={handleEditSuccess}
+              />
+            );
+          })()
         ) : isBedspace ? (
           // 2. BEDSPACE LIST MODE
           <div className="space-y-3 mt-4">

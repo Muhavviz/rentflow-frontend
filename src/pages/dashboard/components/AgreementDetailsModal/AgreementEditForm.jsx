@@ -16,26 +16,42 @@ export default function AgreementEditForm({ agreement, unitId, onCancel, onSucce
   const dispatch = useDispatch();
   const [globalError, setGlobalError] = useState(null);
   
+  // Early return if agreement is undefined
+  if (!agreement) {
+    return (
+      <div className="py-8 text-center text-muted-foreground">
+        Agreement not found. It may have been removed.
+        <Button 
+          variant="outline" 
+          className="mt-4" 
+          onClick={onCancel}
+        >
+          Close
+        </Button>
+      </div>
+    );
+  }
+  
   // Toggles for optional sections
   const [showEmergencyContact, setShowEmergencyContact] = useState(
-    !!(agreement.emergencyContact?.name || agreement.emergencyContact?.phone)
+    !!(agreement?.emergencyContact?.name || agreement?.emergencyContact?.phone)
   );
   const [showIdProof, setShowIdProof] = useState(
-    !!(agreement.idProof?.type || agreement.idProof?.number)
+    !!(agreement?.idProof?.type || agreement?.idProof?.number)
   );
 
   const formik = useFormik({
     initialValues: {
-      rentAmount: agreement.rentAmount || "",
-      securityDeposit: agreement.securityDeposit || "",
-      leaseEndDate: agreement.leaseEndDate ? agreement.leaseEndDate.split("T")[0] : "",
-      rentDueDate: agreement.rentDueDate || "",
-      rentingType: agreement.rentingType || "By Unit",
-      emergencyContact: agreement.emergencyContact || { name: "", phone: "" },
-      idProof: agreement.idProof || { type: "", number: "", url: "" },
-      otherOccupants: agreement.otherOccupants || [],
+      rentAmount: agreement?.rentAmount || "",
+      securityDeposit: agreement?.securityDeposit || "",
+      leaseEndDate: agreement?.leaseEndDate ? agreement.leaseEndDate.split("T")[0] : "",
+      rentDueDate: agreement?.rentDueDate || "",
+      rentingType: agreement?.rentingType || "By Unit",
+      emergencyContact: agreement?.emergencyContact || { name: "", phone: "" },
+      idProof: agreement?.idProof || { type: "", number: "", url: "" },
+      otherOccupants: agreement?.otherOccupants || [],
     },
-    validationSchema: updateAgreementSchema(showEmergencyContact, showIdProof, agreement.leaseStartDate),
+    validationSchema: updateAgreementSchema(showEmergencyContact, showIdProof, agreement?.leaseStartDate),
     onSubmit: async (values) => {
       setGlobalError(null);
       
@@ -51,7 +67,7 @@ export default function AgreementEditForm({ agreement, unitId, onCancel, onSucce
         otherOccupants: values.otherOccupants
       };
 
-      const result = await dispatch(updateAgreement({ agreementId: agreement._id, formData: payload }));
+      const result = await dispatch(updateAgreement({ agreementId: agreement?._id, formData: payload }));
 
       if (updateAgreement.fulfilled.match(result)) {
         dispatch(fetchAgreementsByUnit(unitId)); // Refresh data
@@ -83,7 +99,7 @@ export default function AgreementEditForm({ agreement, unitId, onCancel, onSucce
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2 opacity-60 cursor-not-allowed">
           <Label>Lease Start (Locked)</Label>
-          <Input value={agreement.leaseStartDate.split("T")[0]} disabled />
+          <Input value={agreement?.leaseStartDate ? agreement.leaseStartDate.split("T")[0] : ""} disabled />
         </div>
         <div className="space-y-2">
           <Label>Lease End</Label>
