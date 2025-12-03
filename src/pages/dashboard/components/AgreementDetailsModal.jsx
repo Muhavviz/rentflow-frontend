@@ -1,16 +1,19 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAgreementsByUnit } from "@/slices/agreement-slice";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Loader2, FileText, Pencil, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, FileText, Pencil, ChevronDown, ChevronUp, Download } from "lucide-react";
+import UserContext from "@/context/UserContext";
 
 // Import our new clean components
 import AgreementView from "./AgreementDetailsModal/AgreementView";
 import AgreementEditForm from "./AgreementDetailsModal/AgreementEditForm";
+import LeaseAgreementDocument from "@/components/documents/LeaseAgreementDocument";
 
 export default function AgreementDetailsModal({ children, unitId }) {
   const [open, setOpen] = useState(false);
@@ -20,6 +23,8 @@ export default function AgreementDetailsModal({ children, unitId }) {
 
   const dispatch = useDispatch();
   const { agreementsByUnitId, isLoading } = useSelector((state) => state.agreements);
+  const { dataByBuildingId } = useSelector((state) => state.units);
+  const { user } = useContext(UserContext);
   
   const agreements = agreementsByUnitId[unitId] || [];
   const activeAgreements = useMemo(() => agreements.filter(a => a.isActive), [agreements]);
@@ -27,6 +32,38 @@ export default function AgreementDetailsModal({ children, unitId }) {
   // Logic: Are we dealing with 1 tenant or multiple bedspaces?
   const isBedspace = activeAgreements.some(a => a.rentingType === 'By Bedspace');
   const primaryAgreement = activeAgreements[0]; // For 'By Unit' scenarios
+
+  // Get unit data - try to find it from agreements or from units store
+  const unit = useMemo(() => {
+    if (primaryAgreement?.unit && typeof primaryAgreement.unit === 'object') {
+      return primaryAgreement.unit;
+    }
+    // Try to find unit from units store
+    for (const buildingId in dataByBuildingId) {
+      const unit = dataByBuildingId[buildingId].find(u => u._id === unitId);
+      if (unit) return unit;
+    }
+    // Fallback: create a minimal unit object
+    return { _id: unitId, unitNumber: 'N/A', unitType: '' };
+  }, [primaryAgreement, unitId, dataByBuildingId]);
+
+  // Get owner - use logged-in user as owner
+  const owner = useMemo(() => {
+    // First try to get from logged-in user (most reliable)
+    if (user?.name) {
+      return { name: user.name };
+    }
+    // Try to get owner from building if populated
+    const building = unit?.building;
+    if (building?.owner) {
+      if (typeof building.owner === 'object' && building.owner.name) {
+        return building.owner;
+      }
+      // If owner is just an ID string, use user as fallback
+    }
+    // Final fallback
+    return { name: 'Property Owner' };
+  }, [user, unit]);
 
   // Fetch on Open
   useEffect(() => {
@@ -46,6 +83,28 @@ export default function AgreementDetailsModal({ children, unitId }) {
     setEditingAgreementId(null);
   };
 
+  const PdfButton = ({ agreement, variant = "outline", size = "sm", showText = true }) => (
+    <PDFDownloadLink
+      document={
+        <LeaseAgreementDocument 
+          agreement={agreement} 
+          unit={unit} 
+          owner={owner} 
+        />
+      }
+      fileName={`Lease_${agreement.tenant?.name?.replace(/\s+/g, '_') || 'Tenant'}.pdf`}
+      style={{ textDecoration: "none" }}
+    >
+      {({ loading }) => (
+        <Button variant={variant} size={size} disabled={loading} onClick={(e) => e.stopPropagation()}>
+          <Download className={`h-4 w-4 ${showText ? "mr-2" : ""}`} />
+          {showText && (loading ? "Generating..." : "PDF")}
+        </Button>
+      )}
+    </PDFDownloadLink>
+  );
+
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -62,12 +121,15 @@ export default function AgreementDetailsModal({ children, unitId }) {
                 {isEditing ? "Update lease terms" : `Unit ID: ${unitId}`}
               </DialogDescription>
             </div>
-            
-            {/* Edit Button (Only show in Read Mode and if Single Agreement) */}
+
+            {/* Action Buttons (Only show in Read Mode and if Single Agreement) */}
             {!isEditing && !isBedspace && activeAgreements.length > 0 && (
-              <Button variant="outline" size="sm" onClick={() => handleEditStart(primaryAgreement._id)}>
-                <Pencil className="h-3 w-3 mr-2" /> Edit
-              </Button>
+              <div className="flex gap-2">
+                <PdfButton agreement={primaryAgreement} />
+                <Button variant="outline" size="sm" onClick={() => handleEditStart(primaryAgreement._id)}>
+                  <Pencil className="h-3 w-3 mr-2" /> Edit
+                </Button>
+              </div>
             )}
           </div>
         </DialogHeader>
@@ -115,6 +177,7 @@ export default function AgreementDetailsModal({ children, unitId }) {
                 >
                   <AgreementView agreement={agreement} isCompact={true} />
                   <div className="flex items-center gap-2">
+                    <PdfButton agreement={agreement} variant="ghost" size="sm" showText={false} />
                     <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); handleEditStart(agreement._id); }}>
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -123,7 +186,10 @@ export default function AgreementDetailsModal({ children, unitId }) {
                 </CardHeader>
                 {expandedId === agreement._id && (
                   <CardContent className="p-4 pt-0 border-t bg-gray-50/50">
-                    <div className="pt-4"><AgreementView agreement={agreement} /></div>
+                    <div className="pt-4 flex items-center justify-between mb-4">
+                      <AgreementView agreement={agreement} />
+                      <PdfButton agreement={agreement} />
+                    </div>
                   </CardContent>
                 )}
               </Card>
