@@ -10,12 +10,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Plus, Loader2 } from 'lucide-react';
 
 const buildingSchema = Yup.object({
-    name: Yup.string().required('Building name is required'),
+    name: Yup.string().required('Building name is required').min(4, 'Building name must be at least 4 characters'),
     address: Yup.object({
-        street: Yup.string().required('Street is required'),
-        city: Yup.string().required('City is required'),
-        state: Yup.string().required('State is required'),
-        pincode: Yup.string().required('Pincode is required')
+        street: Yup.string().required('Street is required').min(3, 'Street must be at least 3 characters'),
+        city: Yup.string().required('City is required').min(3, 'City must be at least 3 characters'),
+        state: Yup.string().required('State is required').min(3, 'State must be at least 3 characters'),
+        pincode: Yup.string().required('Pincode is required').min(3, 'Pincode must be at least 3 characters')
     })
 })
 
@@ -23,6 +23,7 @@ export default function AddBuildingModal({ children, buildingId }) {
     const [open, setOpen] = useState(false);
     const dispatch = useDispatch();
     const buildings = useSelector((state) => state.buildings.data);
+    const serverError = useSelector((state) => state.buildings.serverError);
 
     const editingBuilding = buildingId ? buildings.find(b => b._id === buildingId) : null;
     const isEditMode = !!editingBuilding;
@@ -40,13 +41,23 @@ export default function AddBuildingModal({ children, buildingId }) {
         enableReinitialize: true,
         validationSchema: buildingSchema,
         onSubmit: async (values, { resetForm }) => {
-            if (isEditMode) {
-                await dispatch(updateBuilding({ id: buildingId, formData: values }));
-            } else {
-                await dispatch(createBuilding(values));
+            try {
+                let result;
+                if (isEditMode) {
+                    result = await dispatch(updateBuilding({ id: buildingId, formData: values }));
+                } else {
+                    result = await dispatch(createBuilding(values));
+                }
+                
+                // Only close modal and reset form if the action was successful
+                if (result.type.endsWith('/fulfilled')) {
+                    resetForm();
+                    setOpen(false);
+                }
+            } catch (error) {
+                // Error is handled by Redux, but we keep the modal open
+                console.error('Error creating/updating building:', error);
             }
-            resetForm();
-            setOpen(false);
         }
     });
 
@@ -142,6 +153,22 @@ export default function AddBuildingModal({ children, buildingId }) {
                             {isAddressError('pincode') && <span className="text-xs text-red-500">{formik.errors.address.pincode}</span>}
                         </div>
                     </div>
+
+                    {serverError && (
+                        <div className="text-sm text-red-500 bg-red-50 p-3 rounded-md">
+                            {Array.isArray(serverError?.error) ? (
+                                <ul className="list-disc list-inside">
+                                    {serverError.error.map((err, idx) => (
+                                        <li key={idx}>{err.message || err}</li>
+                                    ))}
+                                </ul>
+                            ) : typeof serverError?.error === 'string' ? (
+                                serverError.error
+                            ) : (
+                                'Failed to save building. Please try again.'
+                            )}
+                        </div>
+                    )}
 
                     <div className="flex justify-end pt-4">
                         <Button type='submit' disabled={formik.isSubmitting}>
