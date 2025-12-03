@@ -87,9 +87,9 @@ export default function ChangePassword() {
                 });
 
                 // Password changed successfully - backend sets needsPasswordChange to false
-                // Refresh user data by calling dashboard endpoint, then navigate to dashboard
+                // Refresh user data by calling getProfile endpoint, then navigate to dashboard
                 try {
-                    const userResponse = await axios.get('/api/dashboard', {
+                    const userResponse = await axios.get('/api/users/me', {
                         headers: { Authorization: token }
                     });
                     // User data refreshed - navigate to dashboard

@@ -58,6 +58,20 @@ export const fetchAdminStats = createAsyncThunk(
   }
 );
 
+export const fetchAllUsers = createAsyncThunk(
+  "users/fetchAllUsers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get("/api/admin/users", {
+        headers: { Authorization: localStorage.getItem("token") },
+      });
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { error: "Something went wrong" });
+    }
+  }
+);
+
 const usersSlice = createSlice({
   name: "users",
   initialState: {
@@ -70,6 +84,9 @@ const usersSlice = createSlice({
     adminStats: null,
     adminStatsLoading: false,
     adminStatsError: null,
+    allUsers: [],
+    usersLoading: false,
+    usersError: null,
   },
   reducers: {
     clearSearchedTenant: (state) => {
@@ -134,6 +151,19 @@ const usersSlice = createSlice({
       .addCase(fetchAdminStats.rejected, (state, action) => {
         state.adminStatsLoading = false;
         state.adminStatsError = action.payload;
+      })
+      .addCase(fetchAllUsers.pending, (state) => {
+        state.usersLoading = true;
+        state.usersError = null;
+      })
+      .addCase(fetchAllUsers.fulfilled, (state, action) => {
+        state.usersLoading = false;
+        state.allUsers = action.payload;
+        state.usersError = null;
+      })
+      .addCase(fetchAllUsers.rejected, (state, action) => {
+        state.usersLoading = false;
+        state.usersError = action.payload;
       });
   },
 });

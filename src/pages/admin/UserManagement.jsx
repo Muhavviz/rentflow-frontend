@@ -1,31 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchAllUsers } from "@/slices/users-slice";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
     Users, 
     Search, 
-    Filter, 
-    MoreVertical, 
-    Edit, 
-    Trash2, 
     Mail, 
     Building2,
     Shield,
     User,
-    ChevronDown,
-    ChevronUp,
-    Download,
-    Plus
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-
-// Mock data - replace with actual API call
-const mockUsers = [
-    { id: 1, name: "John Doe", email: "john@example.com", role: "owner", buildings: 3, status: "active", joined: "2024-01-15" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", role: "tenant", buildings: 1, status: "active", joined: "2024-02-20" },
-    { id: 3, name: "Bob Johnson", email: "bob@example.com", role: "owner", buildings: 5, status: "active", joined: "2024-01-10" },
-    { id: 4, name: "Alice Williams", email: "alice@example.com", role: "tenant", buildings: 1, status: "inactive", joined: "2024-03-05" },
-];
 
 const roleConfig = {
     owner: { icon: Building2, color: "text-blue-600", bg: "bg-blue-100", label: "Owner" },
@@ -34,26 +19,24 @@ const roleConfig = {
 };
 
 export default function UserManagement() {
+    const dispatch = useDispatch();
+    const { allUsers, usersLoading, usersError } = useSelector((state) => state.users);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterRole, setFilterRole] = useState("all");
-    const [expandedRows, setExpandedRows] = useState(new Set());
 
-    const filteredUsers = mockUsers.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    useEffect(() => {
+        dispatch(fetchAllUsers());
+    }, [dispatch]);
+
+    const filteredUsers = (allUsers || []).filter(user => {
+        if (!user) return false;
+        const name = user.name || "";
+        const email = user.email || "";
+        const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            email.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesRole = filterRole === "all" || user.role === filterRole;
         return matchesSearch && matchesRole;
     });
-
-    const toggleRow = (id) => {
-        const newExpanded = new Set(expandedRows);
-        if (newExpanded.has(id)) {
-            newExpanded.delete(id);
-        } else {
-            newExpanded.add(id);
-        }
-        setExpandedRows(newExpanded);
-    };
 
     return (
         <div className="space-y-6">
@@ -66,26 +49,48 @@ export default function UserManagement() {
             >
                 <div>
                     <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent">
-                        User Management
+                        User List
                     </h2>
-                    <p className="text-slate-500 mt-1.5">Manage all platform users</p>
+                    <p className="text-slate-500 mt-1.5">View all platform users and their information</p>
                 </div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add User
-                    </Button>
-                </motion.div>
             </motion.div>
 
+            {/* Error Message */}
+            {usersError && (
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-red-50 border border-red-200 rounded-xl p-4"
+                >
+                    <p className="text-red-600 text-sm">
+                        Error loading users: {usersError?.error || usersError?.message || "Something went wrong"}
+                    </p>
+                </motion.div>
+            )}
+
+            {/* Loading State */}
+            {usersLoading && (
+                <div className="flex items-center justify-center py-12">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex flex-col items-center gap-3"
+                    >
+                        <Users className="h-12 w-12 text-indigo-600 animate-pulse" />
+                        <p className="text-slate-500 text-sm">Loading users...</p>
+                    </motion.div>
+                </div>
+            )}
+
             {/* Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-4">
-                {[
-                    { label: "Total Users", value: mockUsers.length, icon: Users, color: "from-blue-500 to-cyan-500" },
-                    { label: "Owners", value: mockUsers.filter(u => u.role === "owner").length, icon: Building2, color: "from-purple-500 to-pink-500" },
-                    { label: "Tenants", value: mockUsers.filter(u => u.role === "tenant").length, icon: User, color: "from-indigo-500 to-violet-500" },
-                    { label: "Active", value: mockUsers.filter(u => u.status === "active").length, icon: Shield, color: "from-emerald-500 to-teal-500" },
-                ].map((stat, index) => (
+            {!usersLoading && (
+                <div className="grid gap-4 md:grid-cols-3">
+                    {[
+                        { label: "Total Users", value: allUsers?.length || 0, icon: Users, color: "from-blue-500 to-cyan-500" },
+                        { label: "Owners", value: allUsers?.filter(u => u.role === "owner").length || 0, icon: Building2, color: "from-purple-500 to-pink-500" },
+                        { label: "Tenants", value: allUsers?.filter(u => u.role === "tenant").length || 0, icon: User, color: "from-indigo-500 to-violet-500" },
+                    ].map((stat, index) => (
                     <motion.div
                         key={stat.label}
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -107,10 +112,12 @@ export default function UserManagement() {
                             </CardContent>
                         </Card>
                     </motion.div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
             {/* Filters and Search */}
+            {!usersLoading && (
             <Card className="border-0 shadow-lg">
                 <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row gap-4">
@@ -161,19 +168,15 @@ export default function UserManagement() {
                             >
                                 Tenants
                             </motion.button>
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="px-4 py-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium transition-all"
-                            >
-                                <Download className="h-4 w-4" />
-                            </motion.button>
+                            
                         </div>
                     </div>
                 </CardContent>
             </Card>
+            )}
 
             {/* Users Table */}
+            {!usersLoading && (
             <Card className="border-0 shadow-xl overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b">
                     <CardTitle className="text-xl font-semibold text-slate-900">All Users</CardTitle>
@@ -185,97 +188,49 @@ export default function UserManagement() {
                                 <tr>
                                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">User</th>
                                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Role</th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Buildings</th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
                                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Joined</th>
-                                    <th className="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 <AnimatePresence>
                                     {filteredUsers.map((user, index) => {
-                                        const RoleIcon = roleConfig[user.role].icon;
-                                        const isExpanded = expandedRows.has(user.id);
+                                        if (!user) return null;
+                                        const RoleIcon = roleConfig[user.role]?.icon || User;
+                                        const userId = user._id || user.id;
+                                        const userName = user.name || "Unknown";
+                                        const userEmail = user.email || "No email";
                                         
                                         return (
                                             <motion.tr
-                                                key={user.id}
+                                                key={userId}
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 exit={{ opacity: 0, x: 20 }}
                                                 transition={{ delay: index * 0.05 }}
-                                                className="hover:bg-slate-50/50 transition-colors cursor-pointer"
-                                                onClick={() => toggleRow(user.id)}
+                                                className="hover:bg-slate-50/50 transition-colors"
                                             >
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg">
-                                                            {user.name[0]}
+                                                            {userName[0]?.toUpperCase() || "?"}
                                                         </div>
                                                         <div>
-                                                            <div className="font-semibold text-slate-900">{user.name}</div>
+                                                            <div className="font-semibold text-slate-900">{userName}</div>
                                                             <div className="text-sm text-slate-500 flex items-center gap-1">
                                                                 <Mail className="h-3 w-3" />
-                                                                {user.email}
+                                                                {userEmail}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${roleConfig[user.role].bg} ${roleConfig[user.role].color}`}>
+                                                    <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${roleConfig[user.role]?.bg || "bg-slate-100"} ${roleConfig[user.role]?.color || "text-slate-600"}`}>
                                                         <RoleIcon className="h-3.5 w-3.5" />
-                                                        {roleConfig[user.role].label}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2">
-                                                        <Building2 className="h-4 w-4 text-slate-400" />
-                                                        <span className="font-medium text-slate-900">{user.buildings}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${
-                                                        user.status === "active"
-                                                            ? "bg-emerald-100 text-emerald-700"
-                                                            : "bg-red-100 text-red-700"
-                                                    }`}>
-                                                        {user.status}
+                                                        {roleConfig[user.role]?.label || user.role}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                                                    {new Date(user.joined).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <motion.button
-                                                            whileHover={{ scale: 1.1 }}
-                                                            whileTap={{ scale: 0.9 }}
-                                                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                                                            onClick={(e) => { e.stopPropagation(); }}
-                                                        >
-                                                            <Edit className="h-4 w-4 text-slate-600" />
-                                                        </motion.button>
-                                                        <motion.button
-                                                            whileHover={{ scale: 1.1 }}
-                                                            whileTap={{ scale: 0.9 }}
-                                                            className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                                                            onClick={(e) => { e.stopPropagation(); }}
-                                                        >
-                                                            <Trash2 className="h-4 w-4 text-red-600" />
-                                                        </motion.button>
-                                                        <motion.button
-                                                            whileHover={{ scale: 1.1 }}
-                                                            whileTap={{ scale: 0.9 }}
-                                                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                                                            onClick={(e) => { e.stopPropagation(); toggleRow(user.id); }}
-                                                        >
-                                                            {isExpanded ? (
-                                                                <ChevronUp className="h-4 w-4 text-slate-600" />
-                                                            ) : (
-                                                                <ChevronDown className="h-4 w-4 text-slate-600" />
-                                                            )}
-                                                        </motion.button>
-                                                    </div>
+                                                    {user.createdAt || user.joined ? new Date(user.createdAt || user.joined).toLocaleDateString() : "N/A"}
                                                 </td>
                                             </motion.tr>
                                         );
@@ -292,6 +247,7 @@ export default function UserManagement() {
                     )}
                 </CardContent>
             </Card>
+            )}
         </div>
     );
 }

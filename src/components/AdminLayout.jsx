@@ -1,5 +1,5 @@
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { LayoutDashboard, Users, Shield, Settings, LogOut, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Users, Shield, LogOut, ChevronRight } from "lucide-react";
 import { useContext } from "react";
 import { clsx } from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,8 +11,7 @@ export default function AdminLayout() {
 
     const navItems = [
         { name: "Platform Overview", icon: LayoutDashboard, path: "/admin/overview" },
-        { name: "User Management", icon: Users, path: "/admin/users" },
-        { name: "System Settings", icon: Settings, path: "/admin/settings" },
+        { name: "User List", icon: Users, path: "/admin/users" },
     ];
 
     return (
