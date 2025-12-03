@@ -35,7 +35,7 @@ export default function AuthProvider(props){
         if(localStorage.getItem('token')){
             (async () => {
                 try {
-                    const response = await axios.get('/api/dashboard',{headers:{Authorization:localStorage.getItem('token')}});
+                    const response = await axios.get('/api/users/me',{headers:{Authorization:localStorage.getItem('token')}});
                     userDispatch({type:'LOGIN',payload:response.data})
                 } catch (err) {
                     localStorage.removeItem('token');
@@ -58,7 +58,13 @@ export default function AuthProvider(props){
                 navigate('/change-password',{state:{email:formData.email}});
             }else{
                 userDispatch({type:'LOGIN',payload:response.data.user});
-                navigate('/dashboard');
+                // Navigate based on user role
+                const userRole = response.data.user.role;
+                if(userRole === 'tenant'){
+                    navigate('/tenant');
+                } else {
+                    navigate('/dashboard');
+                }
             }
             
 
