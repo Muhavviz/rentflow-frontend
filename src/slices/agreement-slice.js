@@ -30,6 +30,20 @@ export const fetchAgreementsByUnit = createAsyncThunk(
   }
 );
 
+export const updateAgreement = createAsyncThunk(
+  "agreements/updateAgreement",
+  async ({ agreementId, formData }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`/api/agreements/${agreementId}`, formData, {
+        headers: { Authorization: localStorage.getItem("token") },
+      });
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { error: "Something went wrong" });
+    }
+  }
+);
+
 const agreementSlice = createSlice({
   name: "agreements",
   initialState: {
@@ -61,10 +75,41 @@ const agreementSlice = createSlice({
         state.serverError = null;
       })
       .addCase(fetchAgreementsByUnit.fulfilled, (state, action) => {
+        state.isLoading = false;
         const { unitId, agreements } = action.payload;
         state.agreementsByUnitId[unitId] = agreements;
       })
       .addCase(fetchAgreementsByUnit.rejected, (state, action) => {
+        state.isLoading = false;
+        state.serverError = action.payload;
+      })
+      .addCase(updateAgreement.pending, (state) => {
+        state.isLoading = true;
+        state.serverError = null;
+      })
+      .addCase(updateAgreement.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.serverError = null;
+        
+        const updatedAgreement = action.payload;
+        if (updatedAgreement) {
+          // Try to find and update the agreement in cache
+          // The unit field might be an ObjectId string or populated object
+          const unitId = typeof updatedAgreement.unit === 'object' 
+            ? updatedAgreement.unit._id || updatedAgreement.unit 
+            : updatedAgreement.unit;
+          
+          if (unitId && state.agreementsByUnitId[unitId]) {
+            const index = state.agreementsByUnitId[unitId].findIndex(
+              (a) => a._id === updatedAgreement._id
+            );
+            if (index !== -1) {
+              state.agreementsByUnitId[unitId][index] = updatedAgreement;
+            }
+          }
+        }
+      })
+      .addCase(updateAgreement.rejected, (state, action) => {
         state.isLoading = false;
         state.serverError = action.payload;
       });
