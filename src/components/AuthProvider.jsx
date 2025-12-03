@@ -60,7 +60,10 @@ export default function AuthProvider(props){
                 userDispatch({type:'LOGIN',payload:response.data.user});
                 // Navigate based on user role
                 const userRole = response.data.user.role;
-                if(userRole === 'tenant'){
+                if (userRole === 'admin') {
+                    navigate('/admin/overview');
+                }
+                else if(userRole === 'tenant'){
                     navigate('/tenant');
                 } else {
                     navigate('/dashboard');

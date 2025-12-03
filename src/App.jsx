@@ -12,6 +12,10 @@ import BuildingDetails from './pages/dashboard/BuildingDetails';
 import MyHome from './pages/tenant/MyHome';
 import TenantLayout from './pages/dashboard/TenantLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminLayout from './components/AdminLayout';
+import AdminOverview from './pages/admin/AdminOverview';
+import UserManagement from './pages/admin/UserManagement';
+import Settings from './pages/admin/Settings';
 
 function App() {
 
@@ -43,6 +47,17 @@ function App() {
             <Route path='home' element={<MyHome />} />
             <Route path='agreement' element={<div className="text-2xl font-bold">My Agreement (Coming Soon)</div>} />
           </Route>
+
+          <Route path='/admin' element={
+            <ProtectedRoute allowedRoles={['admin']}>
+                <AdminLayout />
+            </ProtectedRoute>
+        }>
+            <Route index element={<Navigate to="overview" />} />
+            <Route path='overview' element={<AdminOverview />} />
+            <Route path='users' element={<UserManagement />} />
+            <Route path='settings' element={<Settings />} />
+        </Route>
         </Routes>
       
     </div>
