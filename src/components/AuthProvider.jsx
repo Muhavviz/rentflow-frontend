@@ -2,7 +2,7 @@ import { useReducer,useEffect } from "react";
 import UserContext from "@/context/UserContext";
 import axios from "@/config/axios";
 import { useNavigate } from "react-router-dom";
-// import { useDispatch } from "react-redux";
+
 
 const userReducer = (state,action) => {
     switch(action.type){
@@ -51,14 +51,13 @@ export default function AuthProvider(props){
 
             const response = await axios.post('/api/users/login',formData);
 
-            // Store token even if password change is required (needed for authentication)
             localStorage.setItem('token',response.data.token);
 
             if(response.data.user.needsPasswordChange){
                 navigate('/change-password',{state:{email:formData.email}});
             }else{
                 userDispatch({type:'LOGIN',payload:response.data.user});
-                // Navigate based on user role
+                
                 const userRole = response.data.user.role;
                 if (userRole === 'admin') {
                     navigate('/admin/overview');

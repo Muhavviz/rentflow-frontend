@@ -67,11 +67,6 @@ export default function BuildingDetails() {
     );
   };
 
-  const getActiveAgreements = (unitId) => {
-    const agreements = agreementsByUnitId[unitId] || [];
-    return agreements.filter((agreement) => agreement.isActive);
-  };
-
   return (
     <div>
       <h1 className="text-2xl font-bold mb-2">Building Details</h1>
@@ -152,7 +147,6 @@ export default function BuildingDetails() {
               </div>
               <div className="flex justify-end gap-2 px-4 pb-3">
                 {unit.status === "vacant" ? (
-                  // Scenario A: Vacant Unit
                   <>
                     <CreateAgreementModal unit={unit} buildingId={id}>
                       <Button variant="outline" size="sm" className="text-xs">
@@ -167,7 +161,6 @@ export default function BuildingDetails() {
                     </AddUnitModal>
                   </>
                 ) : hasByUnitAgreement(unit._id) ? (
-                  // Scenario B: Occupied with By Unit Agreement
                   <>
                     <AgreementDetailsModal unitId={unit._id}>
                       <Button variant="ghost" size="sm" className="text-xs">
@@ -182,7 +175,6 @@ export default function BuildingDetails() {
                     </AddUnitModal>
                   </>
                 ) : (
-                  // Scenario C: Occupied with Bedspace Agreements
                   <>
                     <CreateAgreementModal unit={unit} buildingId={id}>
                       <Button variant="outline" size="sm" className="text-xs">

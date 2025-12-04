@@ -49,13 +49,11 @@ export default function AddBuildingModal({ children, buildingId }) {
                     result = await dispatch(createBuilding(values));
                 }
                 
-                // Only close modal and reset form if the action was successful
                 if (result.type.endsWith('/fulfilled')) {
                     resetForm();
                     setOpen(false);
                 }
             } catch (error) {
-                // Error is handled by Redux, but we keep the modal open
                 console.error('Error creating/updating building:', error);
             }
         }

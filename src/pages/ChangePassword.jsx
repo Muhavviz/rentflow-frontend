@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, AlertCircle } from "lucide-react";
 import axios from "@/config/axios";
 
-// Strict password validation regex: Uppercase, Lowercase, Number, Special
+
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).+$/;
 
 const changePasswordSchema = Yup.object({
@@ -40,13 +40,11 @@ export default function ChangePassword() {
     const [isLoading, setIsLoading] = useState(false);
     const [globalError, setGlobalError] = useState(null);
 
-    // Get email from location.state (Forced/Tenant) OR user.email (Voluntary/Owner)
     const email = location.state?.email || user?.email || '';
 
-    // Determine if this is a forced change (no logged in user) or voluntary (user is logged in)
+
     const isForcedChange = !isLoggedIn || !user;
 
-    // Redirect to login if no email found
     useEffect(() => {
         if (!email) {
             navigate('/login');
@@ -60,7 +58,7 @@ export default function ChangePassword() {
             newPassword: '',
             confirmPassword: ''
         },
-        enableReinitialize: true, // Reinitialize when email changes
+        enableReinitialize: true, 
         validationSchema: changePasswordSchema,
         validateOnBlur: true,
         validateOnChange: true,
@@ -86,17 +84,12 @@ export default function ChangePassword() {
                     headers: { Authorization: token }
                 });
 
-                // Password changed successfully - backend sets needsPasswordChange to false
-                // Refresh user data by calling getProfile endpoint, then navigate to dashboard
                 try {
                     const userResponse = await axios.get('/api/users/me', {
                         headers: { Authorization: token }
                     });
-                    // User data refreshed - navigate to dashboard
-                    // The token is still valid, so dashboard will be accessible
                     navigate('/dashboard');
                 } catch (refreshErr) {
-                    // If refresh fails, redirect to login
                     console.error('Failed to refresh user data:', refreshErr);
                     navigate('/login', { 
                         state: { message: 'Password changed successfully. Please log in with your new password.' }
@@ -121,9 +114,8 @@ export default function ChangePassword() {
         }
     });
 
-    // Show loading or redirect if no email
     if (!email) {
-        return null; // useEffect will handle redirect
+        return null; 
     }
 
     return (

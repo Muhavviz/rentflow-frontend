@@ -5,6 +5,7 @@ import { useContext } from "react";
 import UserContext from "@/context/UserContext";
 import { resetBuildings } from "@/slices/building-slice";
 import { useDispatch } from "react-redux";
+import rentflowLogo from "@/assets/rentflow.png";
 
 export default function Sidebar(){
     const location = useLocation();
@@ -32,11 +33,15 @@ export default function Sidebar(){
     return (
         <div className="w-64 bg-white border-r h-screen flex flex-col fixed left-0 top-0 z-40 shadow-sm">
             <div className="p-6 border-b">
-                <h1 className="text-2xl font-bold text-primary tracking-tight flex items-center gap-2">
-                    <Building2 className="h-6 w-6" />
-                    RentFlow
-                </h1>
-                <p className="text-xs text-gray-500 uppercase tracking-wider mt-1 ml-8">Owner Panel</p>
+                <div className="flex items-center gap-3">
+                    <img src={rentflowLogo} alt="RentFlow Logo" className="h-12 w-auto" />
+                    <div>
+                        <h1 className="text-2xl font-bold text-primary tracking-tight">
+                            RentFlow
+                        </h1>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mt-0.5">Owner Panel</p>
+                    </div>
+                </div>
             </div>
 
             <nav className="flex-1 p-4 space-y-2 overflow-y-auto">

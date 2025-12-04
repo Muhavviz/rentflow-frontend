@@ -43,7 +43,6 @@ export default function CreateTenantForm({
         return;
       }
 
-      // Auto-select the newly created tenant
       agreementFormik.setFieldValue("tenantId", action.payload._id);
       setShowCreateTenant(false);
       resetForm();

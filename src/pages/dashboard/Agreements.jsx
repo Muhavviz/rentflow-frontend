@@ -61,7 +61,6 @@ export default function Agreements() {
         }
     }, [dispatch, ownerAgreements]);
 
-    // Filter agreements based on search query
     const filteredAgreements = (ownerAgreements || []).filter((agreement) => {
         if (!searchQuery) return true;
         
@@ -81,7 +80,6 @@ export default function Agreements() {
         );
     });
 
-    // Calculate stats
     const activeAgreements = filteredAgreements.filter(
         (agreement) => agreement.isActive && agreement.status === 'active'
     );
@@ -90,7 +88,6 @@ export default function Agreements() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -105,7 +102,7 @@ export default function Agreements() {
                 </div>
             </motion.div>
 
-            {/* Error Message */}
+
             {serverError && (
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -118,7 +115,7 @@ export default function Agreements() {
                 </motion.div>
             )}
 
-            {/* Loading State */}
+
             {isLoading && !ownerAgreements?.length && (
                 <div className="flex items-center justify-center py-12">
                     <motion.div
@@ -133,7 +130,7 @@ export default function Agreements() {
                 </div>
             )}
 
-            {/* Stats Cards */}
+
             {!isLoading && (
                 <div className="grid gap-4 md:grid-cols-4">
                     {[
@@ -187,7 +184,6 @@ export default function Agreements() {
                 </div>
             )}
 
-            {/* Search */}
             {!isLoading && (
             <Card className="border-0 shadow-lg">
                 <CardContent className="p-6">
@@ -205,7 +201,7 @@ export default function Agreements() {
             </Card>
             )}
 
-            {/* Agreements Table */}
+
             {!isLoading && (
             <Card className="border-0 shadow-xl overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b">

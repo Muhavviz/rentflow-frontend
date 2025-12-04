@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Check, X } from "lucide-react";
 import { useState } from "react";
 import { updateAgreementSchema } from "./validationSchemas";
-// Reusing your existing sections
 import EmergencyContactSection from "../CreateAgreementModal/EmergencyContactSection";
 import IdProofSection from "../CreateAgreementModal/IdProofSection";
 import OtherOccupantsSection from "../CreateAgreementModal/OtherOccupantsSection";
@@ -16,7 +15,6 @@ export default function AgreementEditForm({ agreement, unitId, onCancel, onSucce
   const dispatch = useDispatch();
   const [globalError, setGlobalError] = useState(null);
   
-  // Early return if agreement is undefined
   if (!agreement) {
     return (
       <div className="py-8 text-center text-muted-foreground">
@@ -32,7 +30,6 @@ export default function AgreementEditForm({ agreement, unitId, onCancel, onSucce
     );
   }
   
-  // Toggles for optional sections
   const [showEmergencyContact, setShowEmergencyContact] = useState(
     !!(agreement?.emergencyContact?.name || agreement?.emergencyContact?.phone)
   );
@@ -55,7 +52,7 @@ export default function AgreementEditForm({ agreement, unitId, onCancel, onSucce
     onSubmit: async (values) => {
       setGlobalError(null);
       
-      // Prepare Payload (Clean up numbers and dates)
+
       const payload = {
         rentAmount: Number(values.rentAmount),
         securityDeposit: Number(values.securityDeposit),
@@ -70,7 +67,7 @@ export default function AgreementEditForm({ agreement, unitId, onCancel, onSucce
       const result = await dispatch(updateAgreement({ agreementId: agreement?._id, formData: payload }));
 
       if (updateAgreement.fulfilled.match(result)) {
-        dispatch(fetchAgreementsByUnit(unitId)); // Refresh data
+        dispatch(fetchAgreementsByUnit(unitId)); 
         onSuccess();
       } else {
         setGlobalError(result.payload?.error || "Update failed");

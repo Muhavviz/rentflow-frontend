@@ -8,11 +8,10 @@ import {
   Font,
 } from "@react-pdf/renderer";
 
-// --- STYLES ---
 const styles = StyleSheet.create({
   page: {
-    padding: 72, // 1 inch margins
-    fontFamily: "Times-Roman", // Standard Legal Font
+    padding: 72, 
+    fontFamily: "Times-Roman", 
     fontSize: 11,
     lineHeight: 1.5,
   },
@@ -43,7 +42,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   listItem: {
-    marginLeft: 24, // Indent list items
+    marginLeft: 24, 
     marginBottom: 4,
   },
   footer: {
@@ -65,7 +64,6 @@ const styles = StyleSheet.create({
   }
 });
 
-// --- HELPERS ---
 
 const formatCurrency = (amount) => {
   if (!amount && amount !== 0) return "N/A";
@@ -91,19 +89,17 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
   const tenant = agreement.tenant || {};
   const address = unit?.building?.address || {};
 
-  // 1. Filter Valid Occupants
   const validOccupants = (agreement.otherOccupants || []).filter(
     occ => occ.name && occ.name.trim() !== ""
   );
 
-  // 2. Dynamic Titles
+
   const getTitle = () => {
     if (agreement.rentingType === 'By Bedspace') return "SHARED ACCOMMODATION AGREEMENT";
     if (unit.unitType === 'Other') return "COMMERCIAL RENTAL AGREEMENT";
     return "RESIDENTIAL LEASE AGREEMENT";
   };
 
-  // 3. Dynamic Usage Clause
   const getUsageClause = () => {
     if (agreement.rentingType === 'By Bedspace') {
       return "The Tenant is leasing a specific Bedspace within the Premises. The Tenant shall have shared access to common areas (kitchen, living room, bathrooms) but does NOT have exclusive possession of the entire Unit. The Tenant agrees to respect the quiet enjoyment and rights of other occupants.";
@@ -114,7 +110,6 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
     return "The Premises shall be used and occupied by the Tenant and listed occupants exclusively as a private single-family residence. The Tenant shall have the right to exclusive possession of the entire Unit.";
   };
 
-  // Build Address String
   const premisesAddress = [
     unit.unitNumber && `Unit ${unit.unitNumber}`,
     unit.building?.name,
@@ -128,12 +123,10 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
     <Document>
       <Page size="A4" style={styles.page}>
         
-        {/* HEADER */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{getTitle()}</Text>
         </View>
 
-        {/* 1. PARTIES */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>1. PARTIES</Text>
           <Text style={styles.sectionContent}>
@@ -149,7 +142,6 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
           </Text>
         </View>
 
-        {/* 2. PREMISES */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>2. PREMISES</Text>
           <Text style={styles.sectionContent}>
@@ -158,7 +150,6 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
           <Text style={styles.sectionContent}>{premisesAddress}.</Text>
         </View>
 
-        {/* 3. TERM & NOTICE */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>3. TERM AND NOTICE</Text>
           <Text style={styles.sectionContent}>
@@ -169,7 +160,6 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
           </Text>
         </View>
 
-        {/* 4. RENT */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>4. RENT</Text>
           <Text style={styles.sectionContent}>
@@ -180,7 +170,6 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
           </Text>
         </View>
 
-        {/* 5. SECURITY DEPOSIT */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>5. SECURITY DEPOSIT</Text>
           <Text style={styles.sectionContent}>
@@ -188,7 +177,6 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
           </Text>
         </View>
 
-        {/* 6. USE OF PREMISES */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>6. USE OF PREMISES</Text>
           <Text style={styles.sectionContent}>{getUsageClause()}</Text>
@@ -207,7 +195,6 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
           )}
         </View>
 
-        {/* 7. DEFAULT & TERMINATION */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>7. DEFAULT AND TERMINATION</Text>
           <Text style={styles.sectionContent}>
@@ -221,7 +208,6 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
           </Text>
         </View>
 
-        {/* 8. GOVERNING LAW */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>8. GOVERNING LAW</Text>
           <Text style={styles.sectionContent}>
@@ -229,7 +215,6 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
           </Text>
         </View>
 
-        {/* SIGNATURES */}
         <View style={styles.footer}>
           <View style={styles.signatureBox}>
             <Text style={styles.signatureLabel}>Landlord: {owner.name || "N/A"}</Text>
@@ -248,7 +233,6 @@ export default function LeaseAgreementDocument({ agreement, unit, owner }) {
   );
 }
 
-// Helper for day ordinals (1st, 2nd, 3rd)
 const getOrdinal = (n) => {
   if (!n) return "";
   const s = ["th", "st", "nd", "rd"];

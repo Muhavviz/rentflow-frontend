@@ -8,12 +8,12 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
     const { isLoggedIn, user } = useContext(UserContext);
     const hasToken = localStorage.getItem('token');
 
-    // No token and not logged in - redirect to login
+
     if (!isLoggedIn && !hasToken) {
         return <Navigate to="/login" replace />;
     }
 
-    // Has token but user data not loaded yet - show loading
+
     if (!isLoggedIn && hasToken) {
         return (
             <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -36,7 +36,7 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
         );
     }
 
-    // User is logged in but still loading user data - wait
+
     if (isLoggedIn && !user && hasToken) {
         return (
             <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -59,7 +59,7 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
         );
     }
 
-    // Check role authorization only if user data is available and allowedRoles are specified
+
     if (isLoggedIn && user && allowedRoles && allowedRoles.length > 0) {
         const userRole = user.role?.toLowerCase();
         const hasPermission = allowedRoles.some(role => role.toLowerCase() === userRole);

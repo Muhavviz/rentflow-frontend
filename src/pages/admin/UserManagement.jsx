@@ -40,7 +40,6 @@ export default function UserManagement() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -55,7 +54,6 @@ export default function UserManagement() {
                 </div>
             </motion.div>
 
-            {/* Error Message */}
             {usersError && (
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -68,7 +66,6 @@ export default function UserManagement() {
                 </motion.div>
             )}
 
-            {/* Loading State */}
             {usersLoading && (
                 <div className="flex items-center justify-center py-12">
                     <motion.div
@@ -83,7 +80,6 @@ export default function UserManagement() {
                 </div>
             )}
 
-            {/* Stats Cards */}
             {!usersLoading && (
                 <div className="grid gap-4 md:grid-cols-3">
                     {[
@@ -116,7 +112,6 @@ export default function UserManagement() {
                 </div>
             )}
 
-            {/* Filters and Search */}
             {!usersLoading && (
             <Card className="border-0 shadow-lg">
                 <CardContent className="p-6">
@@ -175,7 +170,6 @@ export default function UserManagement() {
             </Card>
             )}
 
-            {/* Users Table */}
             {!usersLoading && (
             <Card className="border-0 shadow-xl overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b">

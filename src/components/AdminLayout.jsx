@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { clsx } from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import UserContext from "../context/UserContext";
+import rentflowLogo from "@/assets/rentflow.png";
 
 export default function AdminLayout() {
     const location = useLocation();
@@ -32,11 +33,11 @@ export default function AdminLayout() {
                 >
                     <div className="flex items-center gap-3">
                         <motion.div
-                            whileHover={{ rotate: [0, -10, 10, -10, 0] }}
-                            transition={{ duration: 0.5 }}
-                            className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg"
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ duration: 0.3 }}
+                            className="flex items-center justify-center"
                         >
-                            <Shield className="h-6 w-6 text-white" />
+                            <img src={rentflowLogo} alt="RentFlow Logo" className="h-14 w-auto" />
                         </motion.div>
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight text-white">

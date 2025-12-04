@@ -11,7 +11,6 @@ import SplitText from "../../components/SplitText";
 import StatCard from "./components/StatCard";
 import { fetchMyResidences } from "../../slices/agreement-slice";
 import LeaseAgreementDocument from "../../components/documents/LeaseAgreementDocument";
-// Import the new helpers
 import { 
     formatDate, formatCurrency, formatAddress, 
     calculateDaysUntilRenewal, calculateNextPaymentDate 
@@ -39,10 +38,8 @@ export default function MyHome() {
         dispatch(fetchMyResidences());
     }, [dispatch]);
 
-    // Get the first active agreement
     const agreement = myResidences && myResidences.length > 0 ? myResidences[0] : null;
 
-    // Get unit data
     const unit = useMemo(() => {
         if (agreement?.unit && typeof agreement.unit === 'object') {
             return agreement.unit;
@@ -50,7 +47,6 @@ export default function MyHome() {
         return null;
     }, [agreement]);
 
-    // Get owner data
     const owner = useMemo(() => {
         if (unit?.building?.owner) {
             if (typeof unit.building.owner === 'object' && unit.building.owner.name) {
@@ -115,7 +111,7 @@ export default function MyHome() {
         );
     }
 
-    // Use the helpers to format data
+
     const residenceInfo = {
         unitNumber: agreement.unit?.unitNumber || "N/A",
         buildingName: agreement.unit?.building?.name || "N/A",
@@ -168,7 +164,7 @@ export default function MyHome() {
                 animate="visible"
                 className="space-y-6"
             >
-                {/* Status Banner */}
+
                 <motion.div variants={itemVariants} className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 flex items-center gap-4">
                     <CheckCircle2 className="h-8 w-8 text-green-600" />
                     <div className="flex-1">
@@ -181,7 +177,6 @@ export default function MyHome() {
                     </div>
                 </motion.div>
 
-                {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCard icon={Building2} label="Unit Number" value={residenceInfo.unitNumber} gradient="from-blue-500 to-blue-600" delay={0.1} />
                     <StatCard icon={IndianRupee} label="Monthly Rent" value={residenceInfo.monthlyRent} gradient="from-green-500 to-emerald-600" delay={0.2} />
@@ -189,10 +184,8 @@ export default function MyHome() {
                     <StatCard icon={Clock} label="Days Until Renewal" value={`${residenceInfo.daysUntilRenewal} days`} gradient="from-orange-500 to-orange-600" delay={0.4} />
                 </div>
 
-                {/* Split Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Left: Details */}
                     <motion.div variants={itemVariants} className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -219,7 +212,6 @@ export default function MyHome() {
                         </div>
                     </motion.div>
 
-                    {/* Right: Actions */}
                     <motion.div variants={itemVariants} className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border border-gray-200 h-fit">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                         <div className="space-y-3">

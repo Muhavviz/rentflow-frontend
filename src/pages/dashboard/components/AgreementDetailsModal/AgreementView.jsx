@@ -26,7 +26,6 @@ export default function AgreementView({ agreement, isCompact = false }) {
 
   return (
     <div className="space-y-6">
-      {/* Primary Details */}
       <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border">
         <div>
           <Label className="text-xs text-muted-foreground">Tenant</Label>
@@ -39,7 +38,6 @@ export default function AgreementView({ agreement, isCompact = false }) {
         </div>
       </div>
 
-      {/* Financials */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label className="text-xs text-muted-foreground">Rent Amount</Label>
@@ -51,7 +49,6 @@ export default function AgreementView({ agreement, isCompact = false }) {
         </div>
       </div>
 
-      {/* Dates */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label className="text-xs text-muted-foreground">Lease Start</Label>
@@ -63,7 +60,6 @@ export default function AgreementView({ agreement, isCompact = false }) {
         </div>
       </div>
 
-      {/* Nested Sections */}
       {agreement.emergencyContact?.name && (
         <div className="pt-2 border-t">
           <Label className="text-xs text-muted-foreground mb-1 block">Emergency Contact</Label>

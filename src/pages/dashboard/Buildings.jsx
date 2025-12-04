@@ -24,18 +24,15 @@ export default function Buildings() {
         }
     }, [dispatch, buildings.length]);
 
-    // Fetch dashboard stats if not available (contains occupancyByBuilding)
     useEffect(() => {
         if (!dashboardStats) {
             dispatch(fetchDashboardStats());
         }
     }, [dispatch, dashboardStats]);
 
-    // Fetch units for buildings that don't have units data yet
     useEffect(() => {
         if (buildings.length > 0) {
             buildings.forEach((building) => {
-                // Only fetch if not in store and dashboard stats don't have this building
                 const hasUnitsInStore = dataByBuildingId[building._id]?.length > 0;
                 const hasStats = dashboardStats?.occupancyByBuilding?.some(
                     (b) => String(b.buildingId) === String(building._id) || b.buildingName === building.name
@@ -48,12 +45,10 @@ export default function Buildings() {
         }
     }, [dispatch, buildings, dataByBuildingId, dashboardStats]);
 
-    // Calculate building stats
     const buildingStats = useMemo(() => {
         const stats = {};
         
         buildings.forEach((building) => {
-            // First try to use dashboard stats
             const dashboardStat = dashboardStats?.occupancyByBuilding?.find(
                 (b) => String(b.buildingId) === String(building._id) || b.buildingName === building.name
             );
@@ -65,7 +60,6 @@ export default function Buildings() {
                     occupancyRate: dashboardStat.occupancyRate || 0,
                 };
             } else {
-                // Fallback to calculating from units in store
                 const units = dataByBuildingId[building._id] || [];
                 const totalUnits = units.length;
                 const occupiedUnits = units.filter((unit) => unit.status === "occupied").length;
@@ -114,7 +108,6 @@ export default function Buildings() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -130,7 +123,6 @@ export default function Buildings() {
                 {buildings.length > 0 && <AddBuildingModal />}
             </motion.div>
 
-            {/* Stats Cards */}
             {!isLoading && buildings.length > 0 && (
                 <div className="grid gap-4 md:grid-cols-3">
                     {[
@@ -178,7 +170,7 @@ export default function Buildings() {
                 </div>
             )}
 
-            {/* Buildings Grid */}
+
             {buildings.length === 0 ? (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

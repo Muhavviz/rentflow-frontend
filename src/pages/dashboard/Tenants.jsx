@@ -23,12 +23,11 @@ export default function Tenants() {
         }
     }, [dispatch, ownerAgreements]);
 
-    // Extract unique tenants from agreements (filter active agreements only)
     const activeAgreements = (ownerAgreements || []).filter(
         agreement => agreement.isActive && agreement.status === 'active'
     );
 
-    // Get unique tenants (in case same tenant has multiple agreements)
+
     const tenantMap = new Map();
     activeAgreements.forEach(agreement => {
         if (agreement.tenant && agreement.tenant._id) {
@@ -54,7 +53,7 @@ export default function Tenants() {
         return matchesSearch;
     });
 
-    // Flatten for table display - show each agreement as a row
+
     const tableData = [];
     filteredTenants.forEach(tenantData => {
         tenantData.agreements.forEach(agreement => {
@@ -72,7 +71,6 @@ export default function Tenants() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -87,7 +85,6 @@ export default function Tenants() {
                 </div>
             </motion.div>
 
-            {/* Error Message */}
             {serverError && (
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -100,7 +97,6 @@ export default function Tenants() {
                 </motion.div>
             )}
 
-            {/* Loading State */}
             {isLoading && !ownerAgreements?.length && (
                 <div className="flex items-center justify-center py-12">
                     <motion.div
@@ -115,7 +111,6 @@ export default function Tenants() {
                 </div>
             )}
 
-            {/* Stats Cards */}
             {!isLoading && (
                 <div className="grid gap-4 md:grid-cols-3">
                     {[
@@ -163,7 +158,6 @@ export default function Tenants() {
                 </div>
             )}
 
-            {/* Search */}
             {!isLoading && (
             <Card className="border-0 shadow-lg">
                 <CardContent className="p-6">
@@ -181,7 +175,6 @@ export default function Tenants() {
             </Card>
             )}
 
-            {/* Tenants Table */}
             {!isLoading && (
             <Card className="border-0 shadow-xl overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b">

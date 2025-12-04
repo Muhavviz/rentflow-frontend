@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card,CardContent,CardDescription,CardHeader,CardTitle } from "@/components/ui/card";
 import { Loader2,AlertCircle } from "lucide-react";
+import rentflowLogo from "@/assets/rentflow.png";
 
 const loginSchema = Yup.object({
     email: Yup.string().required().email("Invalid email address"),
@@ -59,7 +60,10 @@ export default function Login(){
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <Card className="w-[350px] shadow-lg">
-                <CardHeader>
+                <CardHeader className="text-center">
+                    <div className="flex justify-center mb-4">
+                        <img src={rentflowLogo} alt="RentFlow Logo" className="h-16 w-auto" />
+                    </div>
                     <CardTitle>RentFlow Login</CardTitle>
                     <CardDescription>Enter your credentials to access the dashboard.</CardDescription>
                 </CardHeader>

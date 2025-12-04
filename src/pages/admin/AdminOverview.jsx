@@ -85,7 +85,6 @@ export default function AdminOverview() {
         return null;
     }
 
-    // Prepare data for charts
     const pieChartData = [
         { name: 'Tenants', value: adminStats.totalTenants || 0 },
         { name: 'Owners', value: adminStats.totalOwners || 0 },
@@ -128,7 +127,6 @@ export default function AdminOverview() {
                 animate="visible"
                 className="space-y-6"
             >
-                {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <StatCard 
                         icon={Users} 
@@ -153,9 +151,7 @@ export default function AdminOverview() {
                     />
                 </div>
 
-                {/* Charts Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Pie Chart */}
                     <motion.div 
                         variants={itemVariants}
                         className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
@@ -186,7 +182,7 @@ export default function AdminOverview() {
                         </ResponsiveContainer>
                     </motion.div>
 
-                    {/* Bar Chart */}
+
                     <motion.div 
                         variants={itemVariants}
                         className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"

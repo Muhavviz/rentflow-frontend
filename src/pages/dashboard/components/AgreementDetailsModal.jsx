@@ -12,7 +12,6 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Loader2, FileText, Pencil, ChevronDown, ChevronUp, Download } from "lucide-react";
 import UserContext from "@/context/UserContext";
 
-// Import our new clean components
 import AgreementView from "./AgreementDetailsModal/AgreementView";
 import AgreementEditForm from "./AgreementDetailsModal/AgreementEditForm";
 import LeaseAgreementDocument from "@/components/documents/LeaseAgreementDocument";
@@ -21,7 +20,7 @@ export default function AgreementDetailsModal({ children, unitId }) {
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingAgreementId, setEditingAgreementId] = useState(null);
-  const [expandedId, setExpandedId] = useState(null); // For bedspace list
+  const [expandedId, setExpandedId] = useState(null); 
 
   const dispatch = useDispatch();
   const { agreementsByUnitId, isLoading } = useSelector((state) => state.agreements);
@@ -31,43 +30,40 @@ export default function AgreementDetailsModal({ children, unitId }) {
   const agreements = agreementsByUnitId[unitId] || [];
   const activeAgreements = useMemo(() => agreements.filter(a => a.isActive), [agreements]);
   
-  // Logic: Are we dealing with 1 tenant or multiple bedspaces?
-  const isBedspace = activeAgreements.some(a => a.rentingType === 'By Bedspace');
-  const primaryAgreement = activeAgreements[0]; // For 'By Unit' scenarios
 
-  // Get unit data - try to find it from agreements or from units store
+  const isBedspace = activeAgreements.some(a => a.rentingType === 'By Bedspace');
+  const primaryAgreement = activeAgreements[0]; 
+
+
   const unit = useMemo(() => {
     if (primaryAgreement?.unit && typeof primaryAgreement.unit === 'object') {
       return primaryAgreement.unit;
     }
-    // Try to find unit from units store
+
     for (const buildingId in dataByBuildingId) {
       const unit = dataByBuildingId[buildingId].find(u => u._id === unitId);
       if (unit) return unit;
     }
-    // Fallback: create a minimal unit object
+
     return { _id: unitId, unitNumber: 'N/A', unitType: '' };
   }, [primaryAgreement, unitId, dataByBuildingId]);
 
-  // Get owner - use logged-in user as owner
+
   const owner = useMemo(() => {
-    // First try to get from logged-in user (most reliable)
     if (user?.name) {
       return { name: user.name };
     }
-    // Try to get owner from building if populated
+
     const building = unit?.building;
     if (building?.owner) {
       if (typeof building.owner === 'object' && building.owner.name) {
         return building.owner;
       }
-      // If owner is just an ID string, use user as fallback
     }
-    // Final fallback
     return { name: 'Property Owner' };
   }, [user, unit]);
 
-  // Fetch on Open
+
   useEffect(() => {
     if (open && unitId) {
       dispatch(fetchAgreementsByUnit(unitId));
@@ -92,21 +88,16 @@ export default function AgreementDetailsModal({ children, unitId }) {
     try {
       await dispatch(terminateAgreement(agreement._id)).unwrap();
       
-      // Get buildingId from the unit to refresh units
-      // Try multiple sources: agreement.unit (populated), unit from state, or from units store
+
       let buildingId = null;
-      
-      // First try from agreement's unit (if populated)
       if (agreement.unit && typeof agreement.unit === 'object') {
         buildingId = agreement.unit.building?._id || agreement.unit.building;
       }
       
-      // If not found, try from the unit in component state
       if (!buildingId && unit?.building) {
         buildingId = typeof unit.building === 'object' ? unit.building._id : unit.building;
       }
       
-      // If still not found, try to find from units store
       if (!buildingId) {
         for (const bid in dataByBuildingId) {
           const foundUnit = dataByBuildingId[bid].find(u => u._id === unitId);
@@ -117,15 +108,13 @@ export default function AgreementDetailsModal({ children, unitId }) {
         }
       }
       
-      // Close the modal
+
       setOpen(false);
       
-      // Re-fetch units for the building to update unit status
       if (buildingId) {
         dispatch(fetchUnitsByBuilding(buildingId));
       }
       
-      // Also re-fetch buildings for consistency
       dispatch(fetchBuildings());
     } catch (error) {
       console.error("Failed to terminate agreement:", error);
@@ -172,7 +161,6 @@ export default function AgreementDetailsModal({ children, unitId }) {
               </DialogDescription>
             </div>
 
-            {/* Action Buttons (Only show in Read Mode and if Single Agreement) */}
             {!isEditing && !isBedspace && activeAgreements.length > 0 && (
               <div className="flex gap-2">
                 <PdfButton agreement={primaryAgreement} />
@@ -184,13 +172,12 @@ export default function AgreementDetailsModal({ children, unitId }) {
           </div>
         </DialogHeader>
 
-        {/* --- CONTENT AREA --- */}
         {isLoading ? (
           <div className="py-10 flex justify-center"><Loader2 className="animate-spin text-primary" /></div>
         ) : activeAgreements.length === 0 ? (
           <div className="py-8 text-center text-muted-foreground">No active agreements found.</div>
         ) : isEditing ? (
-          // 1. EDIT MODE
+
           (() => {
             const editingAgreement = activeAgreements.find(a => a._id === editingAgreementId);
             if (!editingAgreement) {
@@ -217,7 +204,6 @@ export default function AgreementDetailsModal({ children, unitId }) {
             );
           })()
         ) : isBedspace ? (
-          // 2. BEDSPACE LIST MODE
           <div className="space-y-3 mt-4">
             {activeAgreements.map(agreement => (
               <Card key={agreement._id} className={`transition-all ${expandedId === agreement._id ? 'ring-1 ring-primary' : ''}`}>
@@ -240,7 +226,7 @@ export default function AgreementDetailsModal({ children, unitId }) {
                       <AgreementView agreement={agreement} />
                       <PdfButton agreement={agreement} />
                     </div>
-                    {/* Terminate Button for Bedspace */}
+
                     <div className="mt-4 pt-4 border-t flex justify-end">
                       <Button
                         variant="destructive"
@@ -267,10 +253,10 @@ export default function AgreementDetailsModal({ children, unitId }) {
             ))}
           </div>
         ) : (
-          // 3. SINGLE AGREEMENT MODE
+
           <div className="mt-4">
              <AgreementView agreement={primaryAgreement} />
-             {/* Footer with Terminate Button */}
+             
              <div className="mt-6 pt-4 border-t flex justify-end">
                <Button
                  variant="destructive"

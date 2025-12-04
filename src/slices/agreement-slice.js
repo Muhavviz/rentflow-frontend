@@ -137,8 +137,6 @@ const agreementSlice = createSlice({
         
         const updatedAgreement = action.payload;
         if (updatedAgreement) {
-          // Try to find and update the agreement in cache
-          // The unit field might be an ObjectId string or populated object
           const unitId = typeof updatedAgreement.unit === 'object' 
             ? updatedAgreement.unit._id || updatedAgreement.unit 
             : updatedAgreement.unit;
@@ -167,7 +165,6 @@ const agreementSlice = createSlice({
         
         const terminatedAgreement = action.payload;
         if (terminatedAgreement) {
-          // Find and update the agreement in cache
           const unitId = typeof terminatedAgreement.unit === 'object' 
             ? terminatedAgreement.unit._id || terminatedAgreement.unit 
             : terminatedAgreement.unit;
@@ -177,7 +174,6 @@ const agreementSlice = createSlice({
               (a) => a._id === terminatedAgreement._id
             );
             if (index !== -1) {
-              // Update status to 'terminated' and isActive to false
               state.agreementsByUnitId[unitId][index] = {
                 ...state.agreementsByUnitId[unitId][index],
                 status: 'terminated',

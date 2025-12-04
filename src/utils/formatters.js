@@ -37,16 +37,13 @@ export const calculateNextPaymentDate = (rentDueDate) => {
     const currentYear = today.getFullYear();
     const currentDay = today.getDate();
     
-    // Get the last day of the current month to handle edge cases like Feb 30
     const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const dueDay = Math.min(rentDueDate, lastDayOfMonth);
     
     let nextPaymentDate;
     if (currentDay < dueDay) {
-        // Payment date is later this month
         nextPaymentDate = new Date(currentYear, currentMonth, dueDay);
     } else {
-        // Payment date is next month
         const nextMonthLastDay = new Date(currentYear, currentMonth + 2, 0).getDate();
         const nextMonthDueDay = Math.min(rentDueDate, nextMonthLastDay);
         nextPaymentDate = new Date(currentYear, currentMonth + 1, nextMonthDueDay);

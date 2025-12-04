@@ -1,10 +1,19 @@
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import heroImage from '../assets/rentflowhero.png'; 
+import heroImage from '../assets/rentflowhero.png';
+import rentflowLogo from '../assets/rentflow.png'; 
 
 export default function Home() {
     return (
-        <div className="flex flex-col min-h-screen bg-white">  
+        <div className="flex flex-col min-h-screen bg-white">
+            
+            <header className="container mx-auto px-4 py-6">
+                <div className="flex items-center gap-3">
+                    <img src={rentflowLogo} alt="RentFlow Logo" className="h-14 w-auto" />
+                    <h1 className="text-2xl font-bold text-gray-900">RentFlow</h1>
+                </div>
+            </header>
+            
             <section className="flex-1 container mx-auto px-4 py-6 flex flex-col-reverse md:flex-row md:items-start items-center gap-12 mt-4 md:mt-10">
                 
                 <div className="flex-1 text-center md:text-left space-y-8">

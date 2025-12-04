@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserContext from "../../context/UserContext";
 import { clsx } from "clsx";
+import rentflowLogo from "@/assets/rentflow.png";
 
 export default function TenantLayout() {
     const location = useLocation();
@@ -30,16 +31,20 @@ export default function TenantLayout() {
                     transition={{ delay: 0.1 }}
                     className="p-6 border-b border-gray-200/50"
                 >
-                    <motion.h1
+                    <motion.div
                         whileHover={{ scale: 1.02 }}
-                        className="text-2xl font-bold text-primary tracking-tight flex items-center gap-2"
+                        className="flex items-center gap-3"
                     >
-                        <Home className="h-6 w-6" />
-                        RentFlow
-                    </motion.h1>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mt-1 ml-8 font-medium">
-                        Resident Portal
-                    </p>
+                        <img src={rentflowLogo} alt="RentFlow Logo" className="h-12 w-auto" />
+                        <div>
+                            <h1 className="text-2xl font-bold text-primary tracking-tight">
+                                RentFlow
+                            </h1>
+                            <p className="text-xs text-gray-500 uppercase tracking-wider mt-0.5 font-medium">
+                                Resident Portal
+                            </p>
+                        </div>
+                    </motion.div>
                 </motion.div>
 
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
